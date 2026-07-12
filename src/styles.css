@@ -2,7 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+/* Fonts are loaded via <link> in src/routes/__root.tsx (Tailwind v4 cannot resolve remote @import). */
 
 @custom-variant dark (&:is(.dark *));
 
