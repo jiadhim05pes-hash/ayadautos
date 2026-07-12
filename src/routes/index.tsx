@@ -38,64 +38,8 @@ function Home() {
 
   return (
     <div className="bg-background text-foreground">
-      {/* Hero */}
-      <section className="relative min-h-[88vh] flex items-center justify-center overflow-hidden -mt-16 pt-16">
-        <div className="absolute inset-0 overflow-hidden">
-          <motion.img
-            src="https://d2xsxph8kpxj0f.cloudfront.net/310419663028859419/9K8v2QKzPgfwmAPwCoRoTy/hero-prado-frontside-f8dc7MxbafAQd5AnuwgZ4n.webp"
-            alt="Toyota Land Cruiser Prado at Ayad Automotives showroom"
-            className="w-full h-full object-cover"
-            loading="eager"
-            fetchPriority="high"
-            initial={{ scale: 1 }}
-            animate={{ scale: 1.05 }}
-            transition={{ duration: 10, ease: 'easeOut', repeat: Infinity, repeatType: 'reverse' }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/65 to-black/40" />
-        </div>
-        <motion.div
-          className="relative z-10 text-center max-w-4xl mx-auto px-4"
-          initial="hidden"
-          animate="show"
-          variants={{ hidden: {}, show: { transition: { staggerChildren: 0.15, delayChildren: 0.1 } } }}
-        >
-          {[
-            <p key="eyebrow" className="text-xs sm:text-sm uppercase tracking-[0.3em] text-red-400 font-semibold mb-4 drop-shadow">
-              Ngong Road · Nairobi · Kenya
-            </p>,
-            <h1 key="h1" className="display-font text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-5 text-white leading-[1.05] drop-shadow-lg">
-              Premium Japanese Imports<br className="hidden sm:block" /> &amp; Executive Vehicles
-            </h1>,
-            <p key="sub" className="text-base sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto drop-shadow-md">
-              Curated inventory, transparent pricing, and financing tailored to Kenyan buyers.
-            </p>,
-            <div key="cta" className="flex flex-col sm:flex-row gap-3 justify-center mt-8 max-w-md sm:max-w-none mx-auto">
-              <Link
-                to="/inventory"
-                className="bg-accent hover:bg-accent/90 text-accent-foreground text-sm sm:text-base px-7 py-3.5 sm:px-9 sm:py-4 rounded-md font-semibold flex items-center justify-center gap-2 transition-all hover:scale-[1.02] shadow-[0_0_30px_-4px_rgba(220,38,38,0.65)] hover:shadow-[0_0_40px_-2px_rgba(220,38,38,0.85)]"
-              >
-                Explore Inventory <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/financing"
-                className="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/40 text-white text-sm sm:text-base px-7 py-3.5 sm:px-9 sm:py-4 rounded-md font-semibold flex items-center justify-center gap-2 transition-all"
-              >
-                Calculate Financing
-              </Link>
-            </div>,
-          ].map((child, i) => (
-            <motion.div
-              key={i}
-              variants={{ hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } } }}
-            >
-              {child}
-            </motion.div>
-          ))}
-          <div className="hidden sm:block absolute -bottom-2 left-1/2 -translate-x-1/2 animate-bounce">
-            <ChevronDown className="w-7 h-7 accent-red" />
-          </div>
-        </motion.div>
-      </section>
+      {/* Scroll-driven showroom hero */}
+      <ShowroomHero />
 
       {/* Trust stats */}
       <section className="py-16 bg-card">
