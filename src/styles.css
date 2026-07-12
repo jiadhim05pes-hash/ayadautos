@@ -122,16 +122,25 @@
     font-family: 'Montserrat', sans-serif;
     font-weight: 800;
   }
+  .serif-display {
+    font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  }
   .accent-red {
-    color: #DC2626;
+    color: var(--accent);
   }
   .accent-light-red {
-    color: #EF4444;
+    color: var(--accent);
   }
   .glass {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(220, 38, 38, 0.2);
+    background: rgba(31, 40, 51, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(197, 198, 199, 0.18);
+  }
+  .metallic-text {
+    background: linear-gradient(180deg, #FFFFFF 0%, #C5C6C7 45%, #7C8188 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }
 
