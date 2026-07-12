@@ -146,7 +146,7 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg active:scale-95;
+    @apply bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg active:scale-95;
   }
   .section-title {
     @apply text-4xl md:text-5xl font-bold mb-4 text-foreground;
