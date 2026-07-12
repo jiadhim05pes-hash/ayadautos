@@ -2,7 +2,7 @@
 @source "../src";
 @import "tw-animate-css";
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+/* Fonts are loaded via <link> in src/routes/__root.tsx (Tailwind v4 cannot resolve remote @import). */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -48,60 +48,61 @@
 
 :root {
   --radius: 0.5rem;
-  --background: #0F172A;
+  /* Executive monochrome palette: Obsidian / Slate / Chrome Silver / Platinum */
+  --background: #0B0C10;
   --foreground: #FFFFFF;
-  --card: #1E293B;
+  --card: #1F2833;
   --card-foreground: #FFFFFF;
-  --popover: #1E293B;
+  --popover: #14181F;
   --popover-foreground: #FFFFFF;
-  --primary: #DC2626;
-  --primary-foreground: #FFFFFF;
-  --secondary: #334155;
-  --secondary-foreground: #E2E8F0;
-  --muted: #475569;
-  --muted-foreground: #CBD5E1;
-  --accent: #DC2626;
-  --accent-foreground: #FFFFFF;
-  --destructive: #EF4444;
-  --destructive-foreground: #FFFFFF;
-  --border: #334155;
-  --input: #1E293B;
-  --ring: #DC2626;
-  --chart-1: #DC2626;
-  --chart-2: #991B1B;
-  --chart-3: #FEE2E2;
-  --chart-4: #EF4444;
-  --chart-5: #7F1D1D;
-  --sidebar: #1E293B;
+  --primary: #C5C6C7;
+  --primary-foreground: #0B0C10;
+  --secondary: #1F2833;
+  --secondary-foreground: #C5C6C7;
+  --muted: #1F2833;
+  --muted-foreground: #9CA1A6;
+  --accent: #C5C6C7;
+  --accent-foreground: #0B0C10;
+  --destructive: #2A2E35;
+  --destructive-foreground: #C5C6C7;
+  --border: #2A2F38;
+  --input: #1F2833;
+  --ring: #C5C6C7;
+  --chart-1: #C5C6C7;
+  --chart-2: #9CA1A6;
+  --chart-3: #FFFFFF;
+  --chart-4: #66707A;
+  --chart-5: #1F2833;
+  --sidebar: #14181F;
   --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #DC2626;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #DC2626;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #334155;
-  --sidebar-ring: #DC2626;
+  --sidebar-primary: #C5C6C7;
+  --sidebar-primary-foreground: #0B0C10;
+  --sidebar-accent: #1F2833;
+  --sidebar-accent-foreground: #C5C6C7;
+  --sidebar-border: #2A2F38;
+  --sidebar-ring: #C5C6C7;
 }
 
 .dark {
-  --background: #0F172A;
+  --background: #0B0C10;
   --foreground: #FFFFFF;
-  --card: #1E293B;
+  --card: #1F2833;
   --card-foreground: #FFFFFF;
-  --popover: #1E293B;
+  --popover: #14181F;
   --popover-foreground: #FFFFFF;
-  --primary: #DC2626;
-  --primary-foreground: #FFFFFF;
-  --secondary: #334155;
-  --secondary-foreground: #E2E8F0;
-  --muted: #475569;
-  --muted-foreground: #CBD5E1;
-  --accent: #DC2626;
-  --accent-foreground: #FFFFFF;
-  --destructive: #EF4444;
-  --destructive-foreground: #FFFFFF;
-  --border: #334155;
-  --input: #1E293B;
-  --ring: #DC2626;
+  --primary: #C5C6C7;
+  --primary-foreground: #0B0C10;
+  --secondary: #1F2833;
+  --secondary-foreground: #C5C6C7;
+  --muted: #1F2833;
+  --muted-foreground: #9CA1A6;
+  --accent: #C5C6C7;
+  --accent-foreground: #0B0C10;
+  --destructive: #2A2E35;
+  --destructive-foreground: #C5C6C7;
+  --border: #2A2F38;
+  --input: #1F2833;
+  --ring: #C5C6C7;
 }
 
 @layer base {
@@ -121,22 +122,31 @@
     font-family: 'Montserrat', sans-serif;
     font-weight: 800;
   }
+  .serif-display {
+    font-family: 'Cormorant Garamond', 'Times New Roman', serif;
+  }
   .accent-red {
-    color: #DC2626;
+    color: var(--accent);
   }
   .accent-light-red {
-    color: #EF4444;
+    color: var(--accent);
   }
   .glass {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(220, 38, 38, 0.2);
+    background: rgba(31, 40, 51, 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(197, 198, 199, 0.18);
+  }
+  .metallic-text {
+    background: linear-gradient(180deg, #FFFFFF 0%, #C5C6C7 45%, #7C8188 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-accent hover:bg-accent/90 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg active:scale-95;
+    @apply bg-accent hover:bg-accent/90 text-accent-foreground font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:shadow-lg active:scale-95;
   }
   .section-title {
     @apply text-4xl md:text-5xl font-bold mb-4 text-foreground;
