@@ -7,10 +7,12 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Header } from "@/components/site/Header";
+import { Footer } from "@/components/site/Footer";
+import { ChatbotSlot } from "@/components/site/ChatbotSlot";
+import { WhatsAppFab } from "@/components/site/WhatsAppFab";
 
 function NotFoundComponent() {
   return (
@@ -37,9 +39,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -77,21 +76,39 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Ayad Automotives — Premium Japanese Imports & Executive Vehicles" },
+      { name: "description", content: "Premium vehicle dealership on Ngong Road, Nairobi. Direct Japanese imports, executive SUVs, bank & SACCO financing, trade-ins and vehicle sourcing." },
+      { name: "author", content: "Ayad Automotives" },
+      { name: "theme-color", content: "#0F172A" },
+      { property: "og:site_name", content: "Ayad Automotives" },
+      { property: "og:title", content: "Ayad Automotives — Premium Vehicles, Nairobi" },
+      { property: "og:description", content: "Direct Japanese imports, executive SUVs, and financing solutions on Ngong Road, Nairobi." },
       { property: "og:type", content: "website" },
+      { property: "og:locale", content: "en_KE" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+    ],
+    scripts: [
       {
-        rel: "stylesheet",
-        href: appCss,
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "AutoDealer",
+          name: "Ayad Automotives",
+          description: "Premium Japanese imports and executive vehicle dealership in Nairobi, Kenya.",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "Ngong Road",
+            addressLocality: "Nairobi",
+            addressCountry: "KE",
+          },
+          telephone: "+254768487356",
+          areaServed: "KE",
+          priceRange: "$$$",
+        }),
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
@@ -100,7 +117,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-function RootShell({ children }: { children: ReactNode }) {
+function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -119,8 +136,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <div className="flex flex-col min-h-dvh">
+        <Header />
+        <main className="flex-1 pt-16">
+          <Outlet />
+        </main>
+        <Footer />
+        <ChatbotSlot />
+        <WhatsAppFab />
+      </div>
     </QueryClientProvider>
   );
 }
