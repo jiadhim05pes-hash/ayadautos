@@ -1,11 +1,11 @@
 import { Link } from '@tanstack/react-router';
 import { createFileRoute } from '@tanstack/react-router';
-import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
-import { ChevronDown, Star, ArrowRight, Car, TrendingUp, DollarSign, Wrench, Heart, FileText, Zap, MessageCircle } from 'lucide-react';
+import { Star, ArrowRight, Car, TrendingUp, DollarSign, Wrench, Heart, FileText, Zap, MessageCircle } from 'lucide-react';
 import { featuredVehicles, formatKes, waLink } from '@/lib/inventory-data';
 import { CountUp } from '@/components/site/CountUp';
 import { PartnersMarquee } from '@/components/site/PartnersMarquee';
+import { ShowroomHero } from '@/components/site/ShowroomHero';
 
 export const Route = createFileRoute('/')({
   head: () => ({
