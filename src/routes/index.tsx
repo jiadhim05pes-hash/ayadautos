@@ -70,11 +70,11 @@ function Home() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {SERVICE_SUMMARY.map(({ icon: Icon, title, desc }) => (
-              <Card key={title} className="glass p-5 hover:border-accent transition-colors">
-                <Icon className="w-7 h-7 accent-red mb-3" />
+              <div key={title} className="group edge-card rounded-xl p-5">
+                <Icon className="lift-icon w-7 h-7 text-foreground mb-3" />
                 <h3 className="font-semibold mb-1 text-sm md:text-base">{title}</h3>
                 <p className="text-xs md:text-sm text-muted-foreground">{desc}</p>
-              </Card>
+              </div>
             ))}
           </div>
           <div className="text-center mt-10">
