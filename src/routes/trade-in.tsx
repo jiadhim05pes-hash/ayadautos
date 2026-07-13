@@ -37,7 +37,7 @@ function TradeInPage() {
   const next = () => setStep((s) => Math.min(STEPS.length - 1, s + 1));
   const back = () => setStep((s) => Math.max(0, s - 1));
 
-  const summary = `Hello Ayad Automotives! I'd like a trade-in valuation.%0A%0AMake: ${form.make}%0AModel: ${form.model}%0AYear: ${form.year}%0AMileage: ${form.mileage} km%0ACondition: ${CONDITIONS[form.condition]}%0AName: ${form.name}%0APhone: ${form.phone}%0AEmail: ${form.email}`;
+  const summary = `Hello Ayad Automotives! I'd like a trade-in valuation.\n\nMake: ${form.make}\nModel: ${form.model}\nYear: ${form.year}\nMileage: ${form.mileage} km\nCondition: ${CONDITIONS[form.condition]}\nName: ${form.name}\nPhone: ${form.phone}\nEmail: ${form.email}`;
 
   const inputCls =
     'w-full bg-input border border-border rounded-md px-4 py-3 text-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent';
