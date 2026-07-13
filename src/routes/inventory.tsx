@@ -113,7 +113,7 @@ function InventoryPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map(v => (
-              <Card key={v.id} className="overflow-hidden glass border border-white/10 hover:border-accent transition-all duration-300 group py-0 hover:scale-[1.02]">
+              <Card key={v.id} className="edge-card overflow-hidden group py-0">
                 <div className="relative h-52 overflow-hidden bg-card">
                   <img src={v.image} alt={v.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute top-3 right-3 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold">{v.year}</div>
