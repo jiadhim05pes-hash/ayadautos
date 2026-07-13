@@ -136,15 +136,72 @@
     color: var(--accent);
   }
   .glass {
-    background: rgba(31, 40, 51, 0.6);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(197, 198, 199, 0.18);
+    background: rgba(26, 29, 36, 0.65);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(226, 232, 240, 0.10);
   }
   .metallic-text {
-    background: linear-gradient(180deg, #FFFFFF 0%, #C5C6C7 45%, #7C8188 100%);
+    background: linear-gradient(180deg, #FFFFFF 0%, #E2E8F0 45%, #7C8188 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+  }
+  .cyan-text {
+    background: linear-gradient(180deg, #FFFFFF 0%, #7DE8F0 40%, #00F0FF 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@layer components {
+  /* Futuristic edge-glow card: base + hover cyber-cyan frame glow */
+  .edge-card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transition: all 0.5s ease-out;
+    will-change: transform, box-shadow, border-color;
+  }
+  .edge-card:hover {
+    border-color: var(--glow);
+    box-shadow: 0 0 0 1px rgba(0, 240, 255, 0.35), 0 0 28px -4px rgba(0, 240, 255, 0.45),
+      0 18px 40px -20px rgba(0, 0, 0, 0.9);
+    transform: translateY(-4px);
+  }
+  /* Smooth reveal panel using grid-template-rows 0fr -> 1fr */
+  .reveal-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.5s ease-out, opacity 0.5s ease-out;
+    opacity: 0;
+  }
+  .edge-card:hover .reveal-panel,
+  .group:hover .reveal-panel {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+  .reveal-panel > * {
+    overflow: hidden;
+    min-height: 0;
+  }
+  /* Card icon lift + color shift on hover */
+  .lift-icon {
+    transition: transform 0.5s ease-out, color 0.5s ease-out;
+  }
+  .edge-card:hover .lift-icon,
+  .group:hover .lift-icon {
+    color: var(--glow);
+    transform: translateY(-4px);
+  }
+  .neon-outline {
+    transition: all 0.4s ease-out;
+    border: 1px solid var(--platinum);
+  }
+  .neon-outline:hover {
+    border-color: var(--glow);
+    color: var(--glow);
+    box-shadow: 0 0 20px -2px rgba(0, 240, 255, 0.55), inset 0 0 12px -6px rgba(0, 240, 255, 0.5);
   }
 }
 
