@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TradeInRouteImport } from './routes/trade-in'
 import { Route as TestimonialsRouteImport } from './routes/testimonials'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -24,6 +25,11 @@ import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
 import { Route as LegalCookiesRouteImport } from './routes/legal.cookies'
 
+const TradeInRoute = TradeInRouteImport.update({
+  id: '/trade-in',
+  path: '/trade-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TestimonialsRoute = TestimonialsRouteImport.update({
   id: '/testimonials',
   path: '/testimonials',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/testimonials': typeof TestimonialsRoute
+  '/trade-in': typeof TradeInRoute
   '/legal/cookies': typeof LegalCookiesRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
   '/legal/privacy': typeof LegalPrivacyRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/testimonials': typeof TestimonialsRoute
+  '/trade-in': typeof TradeInRoute
   '/legal/cookies': typeof LegalCookiesRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
   '/legal/privacy': typeof LegalPrivacyRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/testimonials': typeof TestimonialsRoute
+  '/trade-in': typeof TradeInRoute
   '/legal/cookies': typeof LegalCookiesRoute
   '/legal/disclaimer': typeof LegalDisclaimerRoute
   '/legal/privacy': typeof LegalPrivacyRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/testimonials'
+    | '/trade-in'
     | '/legal/cookies'
     | '/legal/disclaimer'
     | '/legal/privacy'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/testimonials'
+    | '/trade-in'
     | '/legal/cookies'
     | '/legal/disclaimer'
     | '/legal/privacy'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/testimonials'
+    | '/trade-in'
     | '/legal/cookies'
     | '/legal/disclaimer'
     | '/legal/privacy'
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TestimonialsRoute: typeof TestimonialsRoute
+  TradeInRoute: typeof TradeInRoute
   LegalCookiesRoute: typeof LegalCookiesRoute
   LegalDisclaimerRoute: typeof LegalDisclaimerRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
@@ -214,6 +227,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/trade-in': {
+      id: '/trade-in'
+      path: '/trade-in'
+      fullPath: '/trade-in'
+      preLoaderRoute: typeof TradeInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/testimonials': {
       id: '/testimonials'
       path: '/testimonials'
@@ -325,6 +345,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TestimonialsRoute: TestimonialsRoute,
+  TradeInRoute: TradeInRoute,
   LegalCookiesRoute: LegalCookiesRoute,
   LegalDisclaimerRoute: LegalDisclaimerRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
