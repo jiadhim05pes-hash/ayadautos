@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { PageHero } from '@/components/site/PageHero';
-import { Card } from '@/components/ui/card';
+
 import { Car, TrendingUp, DollarSign, Wrench, Heart, FileText, Zap, Award } from 'lucide-react';
 
 export const Route = createFileRoute('/services')({
