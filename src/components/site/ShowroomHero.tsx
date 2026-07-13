@@ -113,7 +113,8 @@ export function ShowroomHero() {
         const [a, b] = s.at;
         // Fade in over first 6% of the zone, out over the last 6%.
         const span = b - a;
-        const fadeIn = ramp(p, a, a + span * 0.28);
+        // First block starts fully visible; last block never fades out.
+        const fadeIn = i === 0 ? 1 : ramp(p, a, a + span * 0.28);
         const fadeOut = 1 - ramp(p, b - span * 0.28, b);
         const active = i === STORY.length - 1 ? fadeIn : fadeIn * fadeOut;
         el.style.opacity = String(active);
