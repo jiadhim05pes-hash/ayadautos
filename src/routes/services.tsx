@@ -36,24 +36,27 @@ function ServicesPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-6 max-w-6xl mx-auto">
             {SERVICES.map(({ icon: Icon, title, desc, benefits }) => (
-              <Card key={title} className="glass p-6 hover:border-accent transition-colors">
+              <div key={title} className="group edge-card rounded-xl p-6">
                 <div className="flex items-start gap-4">
-                  <div className="shrink-0 w-12 h-12 rounded-lg bg-accent/15 flex items-center justify-center">
-                    <Icon className="w-6 h-6 accent-red" />
+                  <div className="shrink-0 w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
+                    <Icon className="lift-icon w-6 h-6 text-foreground" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-bold mb-1">{title}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">{desc}</p>
-                    <ul className="text-sm space-y-1">
-                      {benefits.map(b => (
-                        <li key={b} className="flex items-center gap-2 text-foreground/80">
-                          <span className="w-1.5 h-1.5 rounded-full bg-accent" /> {b}
-                        </li>
-                      ))}
-                    </ul>
+                    <p className="text-sm text-muted-foreground">{desc}</p>
+                    {/* Reveal panel — expands smoothly on hover without shifting the grid */}
+                    <div className="reveal-panel mt-0 group-hover:mt-3">
+                      <ul className="text-sm space-y-1">
+                        {benefits.map(b => (
+                          <li key={b} className="flex items-center gap-2 text-foreground/80">
+                            <span className="w-1.5 h-1.5 rounded-full bg-accent" /> {b}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
