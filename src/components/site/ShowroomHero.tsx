@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
-import { ArrowRight, Car, TrendingUp } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const FRAME_COUNT = 240;
 const framePath = (i: number) =>
@@ -12,21 +12,27 @@ const ramp = (p: number, a: number, b: number) => {
   return t * t * (3 - 2 * t);
 };
 
+// Story-scroll copy synced to scroll percentage zones.
+const STORY = [
+  { at: [0, 0.33] as const, title: 'ENGINEERED PERFECTION', sub: 'Precision-built machines for the discerning few.' },
+  { at: [0.34, 0.66] as const, title: 'CURATED LUXURY SELECTION', sub: 'Hand-picked imports. Executive-grade excellence.' },
+  { at: [0.67, 1] as const, title: 'YOUR NEXT RIDE AWAITS', sub: 'Step into the AYAD showroom experience.' },
+];
+
 export function ShowroomHero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const heroTextRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const storyRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const [ready, setReady] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // Frame images kept in a ref so effects don't re-run when they load.
   const imagesRef = useRef<HTMLImageElement[]>([]);
   const currentFrame = useRef(0);
 
-  // 1. PRELOADING ENGINE — cache every frame in memory, track progress.
+  // 1. PRELOADING ENGINE
   useEffect(() => {
     let cancelled = false;
     let loaded = 0;
@@ -52,14 +58,13 @@ export function ShowroomHero() {
     };
   }, []);
 
-  // 2. CANVAS + GSAP SCROLLTRIGGER — only after frames are cached.
+  // 2. CANVAS + GSAP SCROLLTRIGGER
   useEffect(() => {
     if (!ready) return;
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
 
-    // 3. HARDWARE ACCELERATION
     const ctx = canvas.getContext('2d', {
       alpha: false,
       desynchronized: true,
@@ -76,7 +81,7 @@ export function ShowroomHero() {
       drawFrame(currentFrame.current);
     };
 
-    // ASPECT RATIO COVERAGE — object-fit: cover math, centered.
+    // Responsive object-fit: cover math, centered.
     const drawFrame = (index: number) => {
       const img = imagesRef.current[index];
       if (!img || !img.complete || img.naturalWidth === 0) return;
@@ -95,9 +100,26 @@ export function ShowroomHero() {
       }
       const dx = (cw - dw) / 2;
       const dy = (ch - dh) / 2;
-      ctx.fillStyle = '#0B0C10';
+      ctx.fillStyle = '#060608';
       ctx.fillRect(0, 0, cw, ch);
       ctx.drawImage(img, dx, dy, dw, dh);
+    };
+
+    // Story-scroll text state machine — one active block at a time.
+    const updateStory = (p: number) => {
+      STORY.forEach((s, i) => {
+        const el = storyRefs.current[i];
+        if (!el) return;
+        const [a, b] = s.at;
+        // Fade in over first 6% of the zone, out over the last 6%.
+        const span = b - a;
+        // First block starts fully visible; last block never fades out.
+        const fadeIn = i === 0 ? 1 : ramp(p, a, a + span * 0.28);
+        const fadeOut = 1 - ramp(p, b - span * 0.28, b);
+        const active = i === STORY.length - 1 ? fadeIn : fadeIn * fadeOut;
+        el.style.opacity = String(active);
+        el.style.transform = `translateY(${(1 - active) * 20}px)`;
+      });
     };
 
     let st: { kill: () => void } | undefined;
@@ -122,7 +144,6 @@ export function ShowroomHero() {
         onUpdate: (self: { progress: number }) => {
           const p = self.progress;
 
-          // 1. CANVAS DRAW LOOP — map scroll to frame index.
           const idx = Math.min(
             FRAME_COUNT - 1,
             Math.round(p * (FRAME_COUNT - 1)),
@@ -132,23 +153,21 @@ export function ShowroomHero() {
             drawFrame(idx);
           }
 
-          // 4. CONTENT ZONES TIMELINE — fade text with scroll percentage.
-          if (heroTextRef.current) {
-            heroTextRef.current.style.opacity = String(1 - ramp(p, 0.1, 0.28));
-          }
+          updateStory(p);
+
           if (scrollHintRef.current) {
             scrollHintRef.current.style.opacity = String(1 - ramp(p, 0.02, 0.12));
           }
-          if (cardsRef.current) {
-            const appear = ramp(p, 0.52, 0.7);
-            const leave = ramp(p, 0.9, 1);
-            cardsRef.current.style.opacity = String(appear * (1 - leave));
-            cardsRef.current.style.transform = `translateY(${(1 - appear) * 40}px)`;
+          if (ctaRef.current) {
+            // CTAs stay visible; gently settle in with the first story block.
+            const appear = ramp(p, 0, 0.15);
+            ctaRef.current.style.opacity = String(appear * (1 - ramp(p, 0.72, 0.9)));
           }
         },
       });
 
       drawFrame(0);
+      updateStory(0);
       ScrollTrigger.refresh();
     })();
 
@@ -172,36 +191,63 @@ export function ShowroomHero() {
           </p>
           <div className="h-px w-56 sm:w-72 bg-border overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-transparent via-primary to-transparent transition-[width] duration-200 ease-out"
+              className="h-full bg-gradient-to-r from-transparent via-accent to-transparent transition-[width] duration-200 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
         </div>
       )}
 
-      {/* HERO CANVAS CONTAINMENT — 500vh scroll container */}
+      {/* HERO — 500vh scroll container */}
       <section ref={containerRef} className="relative h-[500vh] bg-background">
         <div className="sticky top-0 h-screen w-full overflow-hidden">
           <canvas ref={canvasRef} className="block h-full w-full" />
 
-          {/* Cinematic vignette for contrast */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/70 via-background/20 to-background/80" />
+          {/* Cinematic vignette */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/70 via-background/20 to-background/85" />
 
-          {/* TEXT OVERLAY — hero */}
-          <div
-            ref={heroTextRef}
-            className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center will-change-[opacity,transform]"
-          >
-            <p className="text-[0.65rem] sm:text-xs uppercase tracking-[0.5em] text-primary/80 mb-6">
-              Ngong Road · Nairobi
-            </p>
-            <h1 className="serif-display metallic-text text-4xl sm:text-6xl md:text-7xl lg:text-[5.5rem] font-medium leading-[1.05] tracking-[0.06em] max-w-5xl">
-              PREMIUM JAPANESE IMPORTS
-              <br className="hidden sm:block" /> &amp; EXECUTIVE VEHICLES
-            </h1>
-            <p className="mt-6 text-sm sm:text-lg tracking-[0.3em] uppercase text-secondary-foreground/80">
-              Curated Luxury. Tailored Finance.
-            </p>
+          {/* UNIFIED TEXT WRAPPER — story-scroll blocks stacked, one visible at a time */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center pointer-events-none">
+            <div className="relative w-full max-w-5xl h-[9rem] sm:h-[11rem] md:h-[13rem]">
+              {STORY.map((s, i) => (
+                <div
+                  key={s.title}
+                  ref={(el) => { storyRefs.current[i] = el; }}
+                  className="absolute inset-0 flex flex-col items-center justify-center will-change-[opacity,transform]"
+                >
+                  <p className="text-[0.65rem] sm:text-xs uppercase tracking-[0.5em] text-accent mb-4">
+                    Ngong Road · Nairobi
+                  </p>
+                  <h1 className="serif-display metallic-text text-4xl sm:text-6xl md:text-7xl lg:text-[5rem] font-medium leading-[1.05] tracking-[0.06em]">
+                    {s.title}
+                  </h1>
+                  <p className="mt-4 text-sm sm:text-lg tracking-[0.28em] uppercase text-secondary-foreground/80">
+                    {s.sub}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* DUAL HERO CTAs */}
+            <div
+              ref={ctaRef}
+              className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 pointer-events-auto will-change-[opacity]"
+            >
+              <Link
+                to="/inventory"
+                className="group inline-flex items-center gap-3 bg-platinum text-background px-8 py-4 text-sm uppercase tracking-[0.25em] font-semibold rounded-md transition-all hover:shadow-[0_0_28px_-4px_rgba(226,232,240,0.6)]"
+                style={{ backgroundColor: 'var(--platinum)' }}
+              >
+                Explore Inventory
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Link>
+              <Link
+                to="/trade-in"
+                className="neon-outline inline-flex items-center gap-3 bg-transparent px-8 py-4 text-sm uppercase tracking-[0.25em] font-semibold rounded-md text-foreground"
+              >
+                Value Your Trade-In
+              </Link>
+            </div>
           </div>
 
           {/* Scroll hint */}
@@ -212,55 +258,7 @@ export function ShowroomHero() {
             <span className="text-[0.6rem] uppercase tracking-[0.4em] text-muted-foreground">
               Scroll
             </span>
-            <span className="h-10 w-px bg-gradient-to-b from-primary to-transparent" />
-          </div>
-
-          {/* CONTENT ZONES — premium service cards fade up over the canvas */}
-          <div
-            ref={cardsRef}
-            className="absolute inset-0 flex items-center justify-center px-6 opacity-0 will-change-[opacity,transform]"
-          >
-            <div className="w-full max-w-4xl">
-              <p className="text-center text-[0.65rem] uppercase tracking-[0.5em] text-primary/80 mb-8">
-                The Ayad Standard
-              </p>
-              <div className="grid gap-5 sm:grid-cols-2">
-                {[
-                  {
-                    icon: Car,
-                    title: 'Direct Imports',
-                    desc: 'Fresh, verified Japanese imports sourced and delivered to your door.',
-                  },
-                  {
-                    icon: TrendingUp,
-                    title: 'Executive SUVs',
-                    desc: 'A curated fleet of premium SUVs for the most discerning clients.',
-                  },
-                ].map(({ icon: Icon, title, desc }) => (
-                  <div
-                    key={title}
-                    className="glass rounded-xl p-7 text-left backdrop-blur-xl"
-                  >
-                    <Icon className="mb-4 h-8 w-8 text-primary" />
-                    <h3 className="serif-display text-2xl tracking-wide text-foreground mb-2">
-                      {title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {desc}
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-10 flex justify-center">
-                <Link
-                  to="/inventory"
-                  className="group inline-flex items-center gap-3 border border-primary/40 bg-primary/5 px-8 py-4 text-sm uppercase tracking-[0.25em] text-foreground transition-all hover:bg-primary hover:text-primary-foreground"
-                >
-                  Enter the Showroom
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-            </div>
+            <span className="h-10 w-px bg-gradient-to-b from-accent to-transparent" />
           </div>
         </div>
       </section>

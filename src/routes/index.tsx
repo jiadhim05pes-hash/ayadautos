@@ -70,11 +70,11 @@ function Home() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {SERVICE_SUMMARY.map(({ icon: Icon, title, desc }) => (
-              <Card key={title} className="glass p-5 hover:border-accent transition-colors">
-                <Icon className="w-7 h-7 accent-red mb-3" />
+              <div key={title} className="group edge-card rounded-xl p-5">
+                <Icon className="lift-icon w-7 h-7 text-foreground mb-3" />
                 <h3 className="font-semibold mb-1 text-sm md:text-base">{title}</h3>
                 <p className="text-xs md:text-sm text-muted-foreground">{desc}</p>
-              </Card>
+              </div>
             ))}
           </div>
           <div className="text-center mt-10">
@@ -94,7 +94,7 @@ function Home() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featured.map((v) => (
-              <Card key={v.id} className="glass overflow-hidden border border-white/10 hover:border-accent transition-all duration-300 group py-0 hover:scale-[1.02]">
+              <div key={v.id} className="group edge-card rounded-xl overflow-hidden">
                 <div className="h-52 relative overflow-hidden">
                   <img src={v.image} alt={v.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   <div className="absolute top-3 right-3 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold">{v.registration}</div>
@@ -118,7 +118,7 @@ function Home() {
                     <MessageCircle className="w-4 h-4" /> Inquire
                   </a>
                 </div>
-              </Card>
+              </div>
             ))}
           </div>
           <div className="text-center mt-10">
