@@ -144,7 +144,7 @@ function TradeInPage() {
                   />
                 </label>
                 <a
-                  href={waLink('') ? `https://wa.me/?text=${summary}` : '#'}
+                  href={waLink(summary)}
                   target="_blank" rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-6 py-3.5 rounded-md transition-all"
                 >
