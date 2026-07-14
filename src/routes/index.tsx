@@ -1,11 +1,16 @@
-import { Link } from '@tanstack/react-router';
-import { createFileRoute } from '@tanstack/react-router';
+import { lazy, Suspense } from 'react';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { Card } from '@/components/ui/card';
-import { Star, ArrowRight, Car, TrendingUp, DollarSign, Wrench, Heart, FileText, Zap, MessageCircle } from 'lucide-react';
-import { featuredVehicles, formatKes, waLink } from '@/lib/inventory-data';
+import { Star, ArrowRight, Car, TrendingUp, DollarSign, Wrench, Heart, FileText, Zap, Truck, ShieldCheck, MapPin } from 'lucide-react';
+import { featuredVehicles } from '@/lib/inventory-data';
 import { CountUp } from '@/components/site/CountUp';
 import { PartnersMarquee } from '@/components/site/PartnersMarquee';
-import { ShowroomHero } from '@/components/site/ShowroomHero';
+import { PremiumVehicleCard } from '@/components/site/PremiumVehicleCard';
+
+// Lazy-load the heavy scroll-driven hero so the header/nav paint instantly.
+const ShowroomHero = lazy(() =>
+  import('@/components/site/ShowroomHero').then((m) => ({ default: m.ShowroomHero })),
+);
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -32,14 +37,20 @@ const SERVICE_SUMMARY = [
   { icon: TrendingUp, title: 'Valuation', desc: 'Professional vehicle appraisal.' },
 ];
 
+const DELIVERY = [
+  { icon: Truck, title: 'Doorstep Delivery', desc: 'We deliver anywhere in Kenya — Nairobi, Mombasa, Kisumu, Eldoret & beyond.' },
+  { icon: ShieldCheck, title: 'Insured Transport', desc: 'Every vehicle transported with full in-transit insurance cover.' },
+  { icon: MapPin, title: 'Live Tracking', desc: 'Get status updates from dispatch to handover, straight to WhatsApp.' },
+];
+
 function Home() {
   const featured = featuredVehicles(6);
 
-
   return (
     <div className="bg-background text-foreground">
-      {/* Scroll-driven showroom hero */}
-      <ShowroomHero />
+      <Suspense fallback={<div className="h-screen bg-background" />}>
+        <ShowroomHero />
+      </Suspense>
 
       {/* Trust stats */}
       <section className="py-16 bg-card">
@@ -85,40 +96,16 @@ function Home() {
         </div>
       </section>
 
-      {/* Featured inventory */}
+      {/* Featured inventory — premium cards, identical to inventory page */}
       <section className="py-20 bg-card">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="section-title">Featured Inventory</h2>
             <p className="text-muted-foreground">Handpicked vehicles ready for viewing in Nairobi.</p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {featured.map((v) => (
-              <div key={v.id} className="group edge-card rounded-xl overflow-hidden">
-                <div className="h-52 relative overflow-hidden">
-                  <img src={v.image} alt={v.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute top-3 right-3 bg-accent text-accent-foreground px-3 py-1 rounded-full text-xs font-bold">{v.registration}</div>
-                  <div className="absolute top-3 left-3 bg-black/70 backdrop-blur px-3 py-1 rounded-full text-xs font-semibold text-white">{v.year}</div>
-                </div>
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="font-bold text-lg text-white leading-tight">{v.name}</h3>
-                    <span className="shrink-0 text-xs font-semibold accent-red border border-accent/40 rounded-md px-2 py-0.5">{v.year}</span>
-                  </div>
-                  <p className="text-2xl font-bold accent-red mb-3">{formatKes(v.priceKes)}</p>
-                  <div className="grid grid-cols-2 gap-2 text-xs text-white/70 mb-4">
-                    <span>{v.fuel}</span><span>{v.transmission}</span>
-                    <span>{v.mileageKm.toLocaleString()} km</span><span>{v.category}</span>
-                  </div>
-                  <a
-                    href={waLink(`Hello! I'm interested in the ${v.name} (${v.year}, ${formatKes(v.priceKes)}). Please share more details.`)}
-                    target="_blank" rel="noopener noreferrer"
-                    className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-4 py-2 rounded-md w-full flex items-center justify-center gap-2 text-sm"
-                  >
-                    <MessageCircle className="w-4 h-4" /> Inquire
-                  </a>
-                </div>
-              </div>
+              <PremiumVehicleCard key={v.id} vehicle={v} />
             ))}
           </div>
           <div className="text-center mt-10">
@@ -129,8 +116,30 @@ function Home() {
         </div>
       </section>
 
-      {/* Testimonials teaser */}
+      {/* Nationwide Delivery */}
       <section className="py-20 bg-background">
+        <div className="container mx-auto px-4 max-w-6xl">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <p className="text-[0.65rem] uppercase tracking-[0.5em] text-accent mb-3">Nationwide Delivery</p>
+            <h2 className="section-title">Delivered to your doorstep, anywhere in Kenya.</h2>
+            <p className="text-muted-foreground">
+              We handle logistics end-to-end so you can drive away — wherever you are.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            {DELIVERY.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="group edge-card rounded-2xl p-6">
+                <Icon className="lift-icon w-8 h-8 text-foreground mb-4" />
+                <h3 className="font-semibold text-lg mb-1">{title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials teaser */}
+      <section className="py-20 bg-card">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="section-title">What Clients Say</h2>
