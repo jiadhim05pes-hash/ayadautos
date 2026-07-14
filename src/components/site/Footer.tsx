@@ -2,6 +2,10 @@ import { Link } from '@tanstack/react-router';
 import { MapPin, Phone, MessageCircle } from 'lucide-react';
 import { LOCATION_DISPLAY, PHONE_DISPLAY, waLink } from '@/lib/inventory-data';
 
+const NEXAS_WA = waLink(
+  "Hello AYAD NEXAS! I'm interested in building a similar AI-powered dealership system. Please share more details.",
+);
+
 export function Footer() {
   const year = new Date().getFullYear();
   return (
@@ -30,9 +34,6 @@ export function Footer() {
           <ul className="space-y-2 text-sm">
             <li><Link to="/legal/privacy" className="text-muted-foreground hover:text-accent">Privacy Policy</Link></li>
             <li><Link to="/legal/terms" className="text-muted-foreground hover:text-accent">Terms & Conditions</Link></li>
-            <li><Link to="/legal/disclaimer" className="text-muted-foreground hover:text-accent">Legal Disclaimer</Link></li>
-            <li><Link to="/legal/cookies" className="text-muted-foreground hover:text-accent">Cookie Policy</Link></li>
-            <li><Link to="/legal/refund" className="text-muted-foreground hover:text-accent">Refund Policy</Link></li>
           </ul>
         </div>
         <div>
@@ -49,7 +50,12 @@ export function Footer() {
           <p>© {year} Ayad Automotives. All rights reserved.</p>
           <p>
             Designed &amp; Powered by{' '}
-            <a href="mailto:ayadnexas@gmail.com" className="text-foreground/90 hover:text-accent font-medium tracking-wide">
+            <a
+              href={NEXAS_WA}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-foreground/90 hover:text-accent font-semibold tracking-wide"
+            >
               AYAD NEXAS
             </a>
           </p>
