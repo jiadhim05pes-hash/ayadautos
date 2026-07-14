@@ -15,6 +15,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as FinancingRouteImport } from './routes/financing'
+import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as FaqsRouteImport } from './routes/faqs'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
@@ -53,6 +54,11 @@ const InventoryRoute = InventoryRouteImport.update({
 const FinancingRoute = FinancingRouteImport.update({
   id: '/financing',
   path: '/financing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqsRoute = FaqsRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/faqs': typeof FaqsRoute
+  '/favorites': typeof FavoritesRoute
   '/financing': typeof FinancingRoute
   '/inventory': typeof InventoryRoute
   '/services': typeof ServicesRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/faqs': typeof FaqsRoute
+  '/favorites': typeof FavoritesRoute
   '/financing': typeof FinancingRoute
   '/inventory': typeof InventoryRoute
   '/services': typeof ServicesRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/faqs': typeof FaqsRoute
+  '/favorites': typeof FavoritesRoute
   '/financing': typeof FinancingRoute
   '/inventory': typeof InventoryRoute
   '/services': typeof ServicesRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/faqs'
+    | '/favorites'
     | '/financing'
     | '/inventory'
     | '/services'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/faqs'
+    | '/favorites'
     | '/financing'
     | '/inventory'
     | '/services'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/faqs'
+    | '/favorites'
     | '/financing'
     | '/inventory'
     | '/services'
@@ -212,6 +224,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   FaqsRoute: typeof FaqsRoute
+  FavoritesRoute: typeof FavoritesRoute
   FinancingRoute: typeof FinancingRoute
   InventoryRoute: typeof InventoryRoute
   ServicesRoute: typeof ServicesRoute
@@ -267,6 +280,13 @@ declare module '@tanstack/react-router' {
       path: '/financing'
       fullPath: '/financing'
       preLoaderRoute: typeof FinancingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faqs': {
@@ -340,6 +360,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   FaqsRoute: FaqsRoute,
+  FavoritesRoute: FavoritesRoute,
   FinancingRoute: FinancingRoute,
   InventoryRoute: InventoryRoute,
   ServicesRoute: ServicesRoute,
