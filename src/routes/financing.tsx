@@ -3,8 +3,13 @@ import { PageHero } from '@/components/site/PageHero';
 import { LoanCalculator } from '@/components/site/LoanCalculator';
 import { Card } from '@/components/ui/card';
 import { Building2, Users, FileCheck, Headphones } from 'lucide-react';
+import { vehicles } from '@/lib/inventory-data';
 
 export const Route = createFileRoute('/financing')({
+  validateSearch: (s: Record<string, unknown>) => ({
+    price: typeof s.price === 'number' ? s.price : undefined,
+    id: typeof s.id === 'string' ? s.id : undefined,
+  }),
   head: () => ({
     meta: [
       { title: 'Financing & Loan Calculator — Ayad Automotives' },
@@ -26,12 +31,21 @@ const OPTIONS = [
 ];
 
 function FinancingPage() {
+  const { price, id } = Route.useSearch();
+  const vehicle = id ? vehicles.find((v) => v.id === id) : undefined;
+
   return (
     <>
-      <PageHero eyebrow="Financing" title="Plan your purchase with confidence." subtitle="Estimate monthly payments, compare options, then talk to our team for a tailored quote." />
+      <PageHero
+        eyebrow="Financing"
+        title={vehicle ? `Financing for the ${vehicle.name}` : 'Plan your purchase with confidence.'}
+        subtitle={vehicle
+          ? 'The calculator below is pre-loaded with this vehicle. Adjust deposit and loan period to fit your budget.'
+          : 'Estimate monthly payments, compare options, then talk to our team for a tailored quote.'}
+      />
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4 max-w-5xl">
-          <LoanCalculator />
+          <LoanCalculator initialPrice={price ?? vehicle?.priceKes} />
         </div>
       </section>
       <section className="py-16 bg-card">

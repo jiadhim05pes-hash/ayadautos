@@ -41,10 +41,10 @@ function computeLoan(price: number, down: number, months: number, annualRatePct:
   return { monthly, totalInterest, totalCost, principal, months };
 }
 
-export function LoanCalculator() {
+export function LoanCalculator({ initialPrice }: { initialPrice?: number } = {}) {
   const [currency, setCurrency] = useState<Currency>('KES');
-  const [price, setPrice] = useState(3_500_000);
-  const [down, setDown] = useState(700_000);
+  const [price, setPrice] = useState(initialPrice ?? 3_500_000);
+  const [down, setDown] = useState(Math.round((initialPrice ?? 3_500_000) * 0.2));
   const [months, setMonths] = useState(48);
   const [rate, setRate] = useState(14);
 
