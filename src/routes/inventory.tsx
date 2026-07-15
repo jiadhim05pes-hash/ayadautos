@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { vehicles, type VehicleCategory } from '@/lib/inventory-data';
+import { type VehicleCategory } from '@/lib/inventory-data';
+import { useVehicles } from '@/hooks/use-vehicles';
 import { PageHero } from '@/components/site/PageHero';
 import { PremiumVehicleCard } from '@/components/site/PremiumVehicleCard';
 import { InventorySearchBar } from '@/components/site/InventorySearchBar';
