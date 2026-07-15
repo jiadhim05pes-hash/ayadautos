@@ -76,7 +76,7 @@ function AdminVehicles() {
     [categories],
   );
 
-  async function save(f: FormState) {
+  async function save(f: FormState): Promise<void> {
     const payload = {
       name: f.name, make: f.make, model: f.model, year: Number(f.year),
       price_kes: Number(f.price_kes), category_id: f.category_id || null,
@@ -90,7 +90,10 @@ function AdminVehicles() {
     const { error } = f.id
       ? await client.from('vehicles').update(payload).eq('id', f.id)
       : await client.from('vehicles').insert(payload);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success(f.id ? 'Vehicle updated' : 'Vehicle added');
     setEditing(null);
     qc.invalidateQueries({ queryKey: ['admin', 'vehicles'] });

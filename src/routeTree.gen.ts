@@ -29,6 +29,7 @@ import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
 import { Route as LegalCookiesRouteImport } from './routes/legal.cookies'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated.admin'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated.admin.index'
+import { Route as AuthenticatedAdminVehiclesRouteImport } from './routes/_authenticated.admin.vehicles'
 
 const TradeInRoute = TradeInRouteImport.update({
   id: '/trade-in',
@@ -129,6 +130,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminVehiclesRoute =
+  AuthenticatedAdminVehiclesRouteImport.update({
+    id: '/vehicles',
+    path: '/vehicles',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/refund': typeof LegalRefundRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/admin/vehicles': typeof AuthenticatedAdminVehiclesRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesByTo {
@@ -169,6 +177,7 @@ export interface FileRoutesByTo {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/refund': typeof LegalRefundRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/admin/vehicles': typeof AuthenticatedAdminVehiclesRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRoutesById {
@@ -192,6 +201,7 @@ export interface FileRoutesById {
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/refund': typeof LegalRefundRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/_authenticated/admin/vehicles': typeof AuthenticatedAdminVehiclesRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
 }
 export interface FileRouteTypes {
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/refund'
     | '/legal/terms'
+    | '/admin/vehicles'
     | '/admin/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -235,6 +246,7 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/refund'
     | '/legal/terms'
+    | '/admin/vehicles'
     | '/admin'
   id:
     | '__root__'
@@ -257,6 +269,7 @@ export interface FileRouteTypes {
     | '/legal/privacy'
     | '/legal/refund'
     | '/legal/terms'
+    | '/_authenticated/admin/vehicles'
     | '/_authenticated/admin/'
   fileRoutesById: FileRoutesById
 }
@@ -423,14 +436,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/vehicles': {
+      id: '/_authenticated/admin/vehicles'
+      path: '/vehicles'
+      fullPath: '/admin/vehicles'
+      preLoaderRoute: typeof AuthenticatedAdminVehiclesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminVehiclesRoute: typeof AuthenticatedAdminVehiclesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminVehiclesRoute: AuthenticatedAdminVehiclesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
