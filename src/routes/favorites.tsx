@@ -2,7 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { PageHero } from '@/components/site/PageHero';
 import { PremiumVehicleCard } from '@/components/site/PremiumVehicleCard';
 import { useVehicleList } from '@/hooks/use-vehicle-lists';
-import { vehicles, formatKes } from '@/lib/inventory-data';
+import { useVehicles } from '@/hooks/use-vehicles';
+import { formatKes } from '@/lib/inventory-data';
 import { Heart, GitCompare, Trash2, ArrowRight } from 'lucide-react';
 
 export const Route = createFileRoute('/favorites')({
