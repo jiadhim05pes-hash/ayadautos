@@ -3,7 +3,7 @@ import { PageHero } from '@/components/site/PageHero';
 import { LoanCalculator } from '@/components/site/LoanCalculator';
 import { Card } from '@/components/ui/card';
 import { Building2, Users, FileCheck, Headphones } from 'lucide-react';
-import { vehicles } from '@/lib/inventory-data';
+import { useVehicles } from '@/hooks/use-vehicles';
 
 export const Route = createFileRoute('/financing')({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -32,6 +32,7 @@ const OPTIONS = [
 
 function FinancingPage() {
   const { price, id } = Route.useSearch();
+  const { data: vehicles } = useVehicles();
   const vehicle = id ? vehicles.find((v) => v.id === id) : undefined;
 
   return (

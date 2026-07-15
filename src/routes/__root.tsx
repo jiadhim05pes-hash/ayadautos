@@ -13,6 +13,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { ChatbotSlot } from "@/components/site/ChatbotSlot";
 import { WhatsAppFab } from "@/components/site/WhatsAppFab";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -154,6 +155,7 @@ function RootComponent() {
         <Footer />
         <ChatbotSlot />
         <WhatsAppFab />
+        <Toaster />
       </div>
     </QueryClientProvider>
   );
