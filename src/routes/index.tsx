@@ -44,7 +44,7 @@ const DELIVERY = [
 ];
 
 function Home() {
-  const featured = featuredVehicles(6);
+  const { data: featured } = useFeaturedVehicles(6);
 
   return (
     <div className="bg-background text-foreground">
