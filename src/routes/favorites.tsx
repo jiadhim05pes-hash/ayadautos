@@ -19,6 +19,7 @@ export const Route = createFileRoute('/favorites')({
 function FavoritesPage() {
   const favs = useVehicleList('favorites');
   const comp = useVehicleList('compare');
+  const { data: vehicles } = useVehicles();
 
   const favVehicles = vehicles.filter((v) => favs.has(v.id));
   const compVehicles = vehicles.filter((v) => comp.has(v.id));
