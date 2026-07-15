@@ -155,6 +155,7 @@ function RootComponent() {
         <Footer />
         <ChatbotSlot />
         <WhatsAppFab />
+        <Toaster />
       </div>
     </QueryClientProvider>
   );
