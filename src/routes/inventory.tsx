@@ -39,6 +39,7 @@ const SORTS = [
 function InventoryPage() {
   const sp = Route.useSearch();
   const [sort, setSort] = useState<(typeof SORTS)[number]['id']>('featured');
+  const { data: vehicles, isLoading } = useVehicles();
 
   const filtered = useMemo(() => {
     let list = vehicles.filter((v) => {
