@@ -32,6 +32,7 @@ const OPTIONS = [
 
 function FinancingPage() {
   const { price, id } = Route.useSearch();
+  const { data: vehicles } = useVehicles();
   const vehicle = id ? vehicles.find((v) => v.id === id) : undefined;
 
   return (
