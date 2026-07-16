@@ -11,8 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { ChatbotSlot } from "@/components/site/ChatbotSlot";
-import { WhatsAppFab } from "@/components/site/WhatsAppFab";
+import { AiChatWidget } from "@/components/site/AiChatWidget";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -153,8 +152,7 @@ function RootComponent() {
           <Outlet />
         </main>
         <Footer />
-        <ChatbotSlot />
-        <WhatsAppFab />
+        <AiChatWidget />
         <Toaster />
       </div>
     </QueryClientProvider>
