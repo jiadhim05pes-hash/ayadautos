@@ -1,23 +1,25 @@
 import { useMemo } from 'react';
 import { createFileRoute, Link, Outlet, useRouterState } from '@tanstack/react-router';
-import { LayoutDashboard, Car, Inbox, LogOut, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, Car, Inbox, LogOut, ExternalLink, BarChart3, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth, useIsStaff } from '@/hooks/use-auth';
+import { useAuth, useIsStaff, useIsSuperAdmin } from '@/hooks/use-auth';
 import { dealership } from '@/config/dealership';
 
 export const Route = createFileRoute('/_authenticated/admin')({
   component: AdminLayout,
 });
 
-const TABS = [
+const BASE_TABS = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/vehicles', label: 'Vehicles', icon: Car },
   { to: '/admin/leads', label: 'Leads', icon: Inbox },
+  { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
 ] as const;
 
 function AdminLayout() {
   const { user } = useAuth();
   const isStaff = useIsStaff(user?.id);
+  const isSuper = useIsSuperAdmin(user?.id);
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const active = useMemo(() => pathname, [pathname]);
 
@@ -31,7 +33,8 @@ function AdminLayout() {
         <p className="text-muted-foreground mb-6">
           You're signed in as <span className="text-foreground">{user?.email}</span> but you don't have
           staff access to the {dealership.brand.name} dashboard. Ask an administrator to grant you
-          the <code className="text-accent">admin</code> or <code className="text-accent">staff</code> role.
+          the <code className="text-accent">admin</code>, <code className="text-accent">staff</code>, or
+          <code className="text-accent"> super_admin</code> role.
         </p>
         <button
           onClick={() => supabase.auth.signOut()}
@@ -43,12 +46,18 @@ function AdminLayout() {
     );
   }
 
+  const tabs = isSuper
+    ? [...BASE_TABS, { to: '/admin/settings' as const, label: 'Settings', icon: Settings }]
+    : BASE_TABS;
+
   return (
     <div className="min-h-[80vh] bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
-            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-accent mb-1">Dashboard</p>
+            <p className="text-[0.65rem] uppercase tracking-[0.35em] text-accent mb-1">
+              Dashboard {isSuper && <span className="ml-2 text-white/60">· Super Admin</span>}
+            </p>
             <h1 className="display-font text-3xl md:text-4xl font-bold">{dealership.brand.displayName}</h1>
           </div>
           <div className="flex gap-2 items-center">
@@ -68,7 +77,7 @@ function AdminLayout() {
         </div>
 
         <nav className="flex flex-wrap gap-1 border-b border-border mb-6">
-          {TABS.map(({ to, label, icon: Icon }) => {
+          {tabs.map(({ to, label, icon: Icon }) => {
             const isActive = active === to || (to !== '/admin' && active.startsWith(to));
             return (
               <Link

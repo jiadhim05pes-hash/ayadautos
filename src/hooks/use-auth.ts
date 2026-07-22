@@ -23,11 +23,11 @@ export function useAuth() {
   return { session, user, loading, signOut: () => supabase.auth.signOut() };
 }
 
-export function useIsStaff(userId?: string | null) {
-  const [isStaff, setIsStaff] = useState<boolean | null>(null);
+function useRoles(userId?: string | null) {
+  const [roles, setRoles] = useState<string[] | null>(null);
   useEffect(() => {
     if (!userId) {
-      setIsStaff(false);
+      setRoles([]);
       return;
     }
     const client = supabase as unknown as { from: (t: string) => any };
@@ -35,10 +35,21 @@ export function useIsStaff(userId?: string | null) {
       .from('user_roles')
       .select('role')
       .eq('user_id', userId)
-      .in('role', ['admin', 'staff'])
       .then(({ data }: { data: unknown }) => {
-        setIsStaff(Array.isArray(data) && data.length > 0);
+        setRoles(Array.isArray(data) ? (data as { role: string }[]).map((r) => r.role) : []);
       });
   }, [userId]);
-  return isStaff;
+  return roles;
+}
+
+export function useIsStaff(userId?: string | null) {
+  const roles = useRoles(userId);
+  if (roles === null) return null;
+  return roles.some((r) => r === 'admin' || r === 'staff' || r === 'super_admin');
+}
+
+export function useIsSuperAdmin(userId?: string | null) {
+  const roles = useRoles(userId);
+  if (roles === null) return null;
+  return roles.includes('super_admin');
 }

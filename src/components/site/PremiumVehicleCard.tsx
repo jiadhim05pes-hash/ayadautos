@@ -15,7 +15,9 @@ import {
 import type { Vehicle } from '@/lib/inventory-data';
 import { formatKes, waLink } from '@/lib/inventory-data';
 import { useVehicleList } from '@/hooks/use-vehicle-lists';
+import { openBlaze } from '@/hooks/use-blaze-chat';
 import { cn } from '@/lib/utils';
+
 
 interface Props {
   vehicle: Vehicle;
@@ -132,24 +134,36 @@ export const PremiumVehicleCard = memo(function PremiumVehicleCard({
           <Spec icon={<CarIcon className="h-4 w-4" />} label={v.category === 'Family Car' ? 'Family' : v.category} />
         </ul>
 
-        {/* Primary actions */}
+        {/* Primary actions — route through Blaze for structured lead capture */}
         <div className="mt-5 grid grid-cols-2 gap-2">
-          <Link
-            to="/financing"
-            search={{ price: v.priceKes, id: v.id }}
+          <button
+            type="button"
+            onClick={() =>
+              openBlaze({
+                intent: 'finance',
+                autoSend: true,
+                prompt: `I'd like to explore financing for the ${v.year} ${v.name} (${formatKes(v.priceKes)}). Please help me estimate monthly payments and start a finance application.`,
+              })
+            }
             className="inline-flex items-center justify-center gap-1.5 rounded-md bg-accent px-3 py-2 text-xs font-semibold uppercase tracking-wider text-accent-foreground transition-colors hover:bg-accent/90"
           >
             <Calculator className="h-3.5 w-3.5" /> Finance
-          </Link>
-          <a
-            href={testDriveHref}
-            target="_blank"
-            rel="noopener noreferrer"
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              openBlaze({
+                intent: 'test_drive',
+                autoSend: true,
+                prompt: `I'd like to book a test drive for the ${v.year} ${v.name}. Please help me schedule it.`,
+              })
+            }
             className="inline-flex items-center justify-center gap-1.5 rounded-md border border-white/15 bg-white/[0.02] px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white/90 transition-colors hover:border-accent hover:text-accent"
           >
             <CalendarCheck className="h-3.5 w-3.5" /> Test Drive
-          </a>
+          </button>
         </div>
+
 
         <div className="mt-2 grid grid-cols-2 gap-2">
           <a
