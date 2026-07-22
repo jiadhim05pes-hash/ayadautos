@@ -265,6 +265,9 @@ async function submitFinance(args: Record<string, any>, validVehicleIds: Set<str
   if (error) return JSON.stringify({ ok: false, error: error.message });
   void notifySales({ type: 'finance', ...payload }).catch(() => {});
   return JSON.stringify({ ok: true, id: data?.id });
+}
+
+
 
 
 async function notifySales(lead: Record<string, unknown>) {
