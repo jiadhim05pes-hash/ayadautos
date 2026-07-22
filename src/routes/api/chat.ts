@@ -354,17 +354,31 @@ export const Route = createFileRoute('/api/chat')({
             messages.push({ role: 'assistant', content: msg.content ?? '', tool_calls: toolCalls });
             for (const call of toolCalls) {
               let result = '{}';
-              if (call.function.name === 'save_lead') {
-                try {
-                  const args = JSON.parse(call.function.arguments || '{}');
-                  result = await saveLead(sessionId, args, userMessages, invIds);
-                } catch (e) {
-                  console.error('[chat] save_lead failed', e);
-                  result = JSON.stringify({ ok: false, error: 'save_failed' });
+              try {
+                const args = JSON.parse(call.function.arguments || '{}');
+                switch (call.function.name) {
+                  case 'save_lead':
+                    result = await saveLead(sessionId, args, userMessages, invIds);
+                    break;
+                  case 'book_test_drive':
+                    result = await bookTestDrive(args, invIds);
+                    break;
+                  case 'submit_trade_in':
+                    result = await submitTradeIn(args);
+                    break;
+                  case 'submit_finance_request':
+                    result = await submitFinance(args, invIds);
+                    break;
+                  default:
+                    result = JSON.stringify({ ok: false, error: 'unknown_tool' });
                 }
+              } catch (e) {
+                console.error(`[chat] tool ${call.function.name} failed`, e);
+                result = JSON.stringify({ ok: false, error: 'tool_failed' });
               }
               messages.push({ role: 'tool', tool_call_id: call.id, content: result });
             }
+
             continue; // loop to let model produce a final assistant message
           }
 
