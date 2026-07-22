@@ -9,22 +9,24 @@ type ChatMessage = { role: 'system' | 'user' | 'assistant' | 'tool'; content: st
 const SALES_EMAIL = dealership.contact.salesEmail;
 
 function buildSystemPrompt(inventorySummary: string): string {
-  return `${dealership.ai.persona}
+  return `You are Blaze, the AI sales concierge for ${dealership.brand.name}, a premium Nairobi dealership. Warm, concise, premium tone — like a Mercedes-Benz concierge.
 
 Today: ${new Date().toISOString().slice(0, 10)}
 Dealership: ${dealership.brand.name} · ${dealership.contact.locationDisplay}
 Hours: ${dealership.contact.hours}
 Phone/WhatsApp: ${dealership.contact.phoneDisplay}
 
-You MUST respond in the same language the user writes in (English, Kiswahili, or Sheng). Be warm, concise, and premium in tone — like a Mercedes-Benz concierge.
+You MUST respond in the same language the user writes in (English, Kiswahili, or Sheng).
 
-Behavior rules:
-- Answer inventory, financing, trade-in and test-drive questions using the current inventory below.
-- Progressively collect lead info across the conversation: name, phone, email, interested vehicle, budget (KES), finance interest (yes/no), trade-in interest (yes/no), preferred viewing date. Do not ask for everything at once — one or two fields per turn, only when it feels natural.
-- The MOMENT you learn ANY of those fields from the user, call the "save_lead" tool with what you know so far. Call it again whenever new info is captured. Never fabricate values.
-- If the user asks for a human, or asks to speak to sales, or seems ready to buy, call "save_lead" with escalate_to_human=true and then tell them the sales team will contact them shortly, and share the WhatsApp number ${dealership.contact.phoneDisplay}.
-- Never invent vehicles that aren't in the inventory list. If asked about something we don't stock, say we can source it and offer to record their request.
-- Keep replies short (2-4 sentences) unless the user asks for detail.
+Behavior:
+- Answer inventory, financing, trade-in and test-drive questions using the inventory below.
+- Progressively collect lead info across the conversation. Do not ask for everything at once.
+- The MOMENT you learn ANY contact info (name, phone, email) call "save_lead". Never fabricate.
+- When the user wants to BOOK A TEST DRIVE, call "book_test_drive" once you have the vehicle + a preferred date (and ideally phone/name). Confirm afterwards.
+- When the user wants to TRADE-IN a vehicle, call "submit_trade_in" once you have make/model/year plus a way to contact them.
+- When the user wants FINANCING, call "submit_finance_request" once you have budget/deposit/term and contact info.
+- If the user asks for a human, call "save_lead" with escalate_to_human=true, tell them sales will reach out shortly, and share ${dealership.contact.phoneDisplay}.
+- Never invent vehicles not in the inventory. Keep replies short (2-4 sentences) unless asked for detail.
 
 Current inventory (top listings):
 ${inventorySummary}`;
@@ -35,27 +37,98 @@ const tools = [
     type: 'function',
     function: {
       name: 'save_lead',
-      description: 'Persist or update the lead captured in the current chat session. Call as soon as ANY field is learned, and again whenever new info comes in. Include only fields you actually know.',
+      description: 'Persist or update the base lead captured in the current chat session. Call as soon as ANY field is learned.',
       parameters: {
         type: 'object',
         properties: {
           name: { type: 'string' },
-          phone: { type: 'string', description: 'E.164 or Kenyan format' },
+          phone: { type: 'string' },
           email: { type: 'string' },
-          interested_vehicle: { type: 'string', description: 'Vehicle name or description' },
-          vehicle_id: { type: 'string', description: 'UUID of the vehicle from the inventory list, if identifiable' },
+          interested_vehicle: { type: 'string' },
+          vehicle_id: { type: 'string' },
           budget_kes: { type: 'number' },
           finance_interest: { type: 'boolean' },
           trade_in_interest: { type: 'boolean' },
           preferred_viewing_date: { type: 'string', description: 'YYYY-MM-DD' },
-          language: { type: 'string', description: 'en, sw, or sheng' },
+          language: { type: 'string' },
           escalate_to_human: { type: 'boolean' },
         },
         additionalProperties: false,
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'book_test_drive',
+      description: 'Create a test-drive booking. Use once vehicle + date are known.',
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          phone: { type: 'string' },
+          email: { type: 'string' },
+          vehicle_id: { type: 'string' },
+          interested_vehicle: { type: 'string' },
+          preferred_date: { type: 'string', description: 'YYYY-MM-DD' },
+          preferred_time: { type: 'string' },
+          notes: { type: 'string' },
+        },
+        required: ['interested_vehicle'],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'submit_trade_in',
+      description: 'Create a trade-in valuation request.',
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          phone: { type: 'string' },
+          email: { type: 'string' },
+          make: { type: 'string' },
+          model: { type: 'string' },
+          year: { type: 'number' },
+          mileage_km: { type: 'number' },
+          condition: { type: 'string' },
+          expected_value_kes: { type: 'number' },
+          notes: { type: 'string' },
+        },
+        required: ['make', 'model'],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'submit_finance_request',
+      description: 'Create a financing application.',
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          phone: { type: 'string' },
+          email: { type: 'string' },
+          vehicle_id: { type: 'string' },
+          interested_vehicle: { type: 'string' },
+          price_kes: { type: 'number' },
+          deposit_kes: { type: 'number' },
+          term_months: { type: 'number' },
+          employment_status: { type: 'string' },
+          monthly_income_kes: { type: 'number' },
+          notes: { type: 'string' },
+        },
+        additionalProperties: false,
+      },
+    },
+  },
 ];
+
 
 async function fetchInventorySummary(): Promise<{ text: string; ids: Set<string> }> {
   try {
@@ -133,6 +206,69 @@ async function saveLead(
 
   return JSON.stringify({ ok: true, lead_id: leadId, escalated });
 }
+
+async function bookTestDrive(args: Record<string, any>, validVehicleIds: Set<string>): Promise<string> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const client = supabaseAdmin as unknown as { from: (t: string) => any };
+  const payload: Record<string, unknown> = {
+    vehicle_name: args.interested_vehicle ?? null,
+    name: args.name ?? null,
+    phone: args.phone ?? null,
+    email: args.email ?? null,
+    preferred_date: args.preferred_date ?? null,
+    notes: [args.preferred_time && `Time: ${args.preferred_time}`, args.notes].filter(Boolean).join(' · ') || null,
+  };
+  if (typeof args.vehicle_id === 'string' && validVehicleIds.has(args.vehicle_id)) payload.vehicle_id = args.vehicle_id;
+  const { data, error } = await client.from('test_drive_requests').insert(payload).select('id').single();
+  if (error) return JSON.stringify({ ok: false, error: error.message });
+  void notifySales({ type: 'test_drive', ...payload }).catch(() => {});
+  return JSON.stringify({ ok: true, id: data?.id });
+}
+
+async function submitTradeIn(args: Record<string, any>): Promise<string> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const client = supabaseAdmin as unknown as { from: (t: string) => any };
+  const payload = {
+    name: args.name ?? null,
+    phone: args.phone ?? null,
+    email: args.email ?? null,
+    make: args.make ?? null,
+    model: args.model ?? null,
+    year: args.year ?? null,
+    mileage_km: args.mileage_km ?? null,
+    condition: args.condition ?? null,
+    estimated_value_kes: args.expected_value_kes ?? null,
+    notes: args.notes ?? null,
+  };
+  const { data, error } = await client.from('trade_in_requests').insert(payload).select('id').single();
+  if (error) return JSON.stringify({ ok: false, error: error.message });
+  void notifySales({ type: 'trade_in', ...payload }).catch(() => {});
+  return JSON.stringify({ ok: true, id: data?.id });
+}
+
+async function submitFinance(args: Record<string, any>, validVehicleIds: Set<string>): Promise<string> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const client = supabaseAdmin as unknown as { from: (t: string) => any };
+  const payload: Record<string, unknown> = {
+    vehicle_name: args.interested_vehicle ?? null,
+    name: args.name ?? null,
+    phone: args.phone ?? null,
+    email: args.email ?? null,
+    vehicle_price: args.price_kes ?? null,
+    deposit: args.deposit_kes ?? null,
+    term_months: args.term_months ?? null,
+    monthly_income: args.monthly_income_kes ?? null,
+    notes: [args.employment_status && `Employment: ${args.employment_status}`, args.notes].filter(Boolean).join(' · ') || null,
+  };
+  if (typeof args.vehicle_id === 'string' && validVehicleIds.has(args.vehicle_id)) payload.vehicle_id = args.vehicle_id;
+  const { data, error } = await client.from('finance_requests').insert(payload).select('id').single();
+  if (error) return JSON.stringify({ ok: false, error: error.message });
+  void notifySales({ type: 'finance', ...payload }).catch(() => {});
+  return JSON.stringify({ ok: true, id: data?.id });
+}
+
+
+
 
 async function notifySales(lead: Record<string, unknown>) {
   const key = process.env.LOVABLE_API_KEY;
@@ -218,17 +354,31 @@ export const Route = createFileRoute('/api/chat')({
             messages.push({ role: 'assistant', content: msg.content ?? '', tool_calls: toolCalls });
             for (const call of toolCalls) {
               let result = '{}';
-              if (call.function.name === 'save_lead') {
-                try {
-                  const args = JSON.parse(call.function.arguments || '{}');
-                  result = await saveLead(sessionId, args, userMessages, invIds);
-                } catch (e) {
-                  console.error('[chat] save_lead failed', e);
-                  result = JSON.stringify({ ok: false, error: 'save_failed' });
+              try {
+                const args = JSON.parse(call.function.arguments || '{}');
+                switch (call.function.name) {
+                  case 'save_lead':
+                    result = await saveLead(sessionId, args, userMessages, invIds);
+                    break;
+                  case 'book_test_drive':
+                    result = await bookTestDrive(args, invIds);
+                    break;
+                  case 'submit_trade_in':
+                    result = await submitTradeIn(args);
+                    break;
+                  case 'submit_finance_request':
+                    result = await submitFinance(args, invIds);
+                    break;
+                  default:
+                    result = JSON.stringify({ ok: false, error: 'unknown_tool' });
                 }
+              } catch (e) {
+                console.error(`[chat] tool ${call.function.name} failed`, e);
+                result = JSON.stringify({ ok: false, error: 'tool_failed' });
               }
               messages.push({ role: 'tool', tool_call_id: call.id, content: result });
             }
+
             continue; // loop to let model produce a final assistant message
           }
 

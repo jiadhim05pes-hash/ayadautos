@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { AiChatWidget } from "@/components/site/AiChatWidget";
+import { PageViewTracker } from "@/components/site/PageViewTracker";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -153,6 +154,7 @@ function RootComponent() {
         </main>
         <Footer />
         <AiChatWidget />
+        <PageViewTracker />
         <Toaster />
       </div>
     </QueryClientProvider>

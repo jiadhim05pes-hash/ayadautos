@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
-import { MessageCircle, Send, X, Sparkles } from 'lucide-react';
+import { MessageCircle, Send, X, Flame } from 'lucide-react';
 import { dealership } from '@/config/dealership';
 import { waLink } from '@/lib/inventory-data';
+import { onBlazeOpen } from '@/hooks/use-blaze-chat';
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
-const SESSION_KEY = 'ayad-ai-session';
-const HISTORY_KEY = 'ayad-ai-history';
+const SESSION_KEY = 'ayad-blaze-session';
+const HISTORY_KEY = 'ayad-blaze-history';
 
 const GREETING =
-  "Karibu Ayad Automotives! I'm your AI concierge — ask me about our imports, financing or booking a viewing. English, Kiswahili au Sheng — yote sawa.";
+  "Karibu Ayad Automotives! I'm Blaze, your AI concierge — ask me about our imports, financing, trade-ins or booking a test drive. English, Kiswahili au Sheng — yote sawa.";
 
 function getSessionId() {
   if (typeof window === 'undefined') return '';
@@ -29,6 +30,8 @@ export function AiChatWidget() {
   const [loading, setLoading] = useState(false);
   const [sessionId, setSessionId] = useState('');
   const listRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const autoSendRef = useRef<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -39,6 +42,17 @@ export function AiChatWidget() {
     } catch {}
   }, []);
 
+  // Listen for global "open Blaze" events (from CTAs across the site).
+  useEffect(() => {
+    if (!mounted) return;
+    return onBlazeOpen(({ prompt, autoSend }) => {
+      setOpen(true);
+      setInput(prompt);
+      if (autoSend) autoSendRef.current = prompt;
+      setTimeout(() => inputRef.current?.focus(), 60);
+    });
+  }, [mounted]);
+
   useEffect(() => {
     if (!mounted) return;
     try {
@@ -47,8 +61,18 @@ export function AiChatWidget() {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, mounted]);
 
-  async function send() {
-    const text = input.trim();
+  // Fire autoSend once the input state has been applied.
+  useEffect(() => {
+    if (autoSendRef.current && input === autoSendRef.current && !loading && sessionId) {
+      const q = autoSendRef.current;
+      autoSendRef.current = null;
+      void send(q);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, sessionId]);
+
+  async function send(override?: string) {
+    const text = (override ?? input).trim();
     if (!text || loading) return;
     const next: ChatMessage[] = [...messages, { role: 'user', content: text }];
     setMessages(next);
@@ -84,14 +108,14 @@ export function AiChatWidget() {
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          aria-label="Open AI concierge"
+          aria-label="Open Blaze AI concierge"
           className="fixed bottom-5 right-5 z-50 group"
         >
           <span className="absolute inset-0 rounded-full bg-accent/60 opacity-60 animate-ping" />
           <span className="relative flex items-center gap-2 pl-3 pr-4 py-3 rounded-full bg-gradient-to-br from-accent to-accent/70 text-accent-foreground shadow-xl shadow-accent/30 hover:scale-105 transition-transform">
-            <Sparkles className="w-5 h-5" />
-            <span className="text-sm font-semibold hidden sm:inline">Ask AI Concierge</span>
-            <span className="text-sm font-semibold sm:hidden">AI</span>
+            <Flame className="w-5 h-5" />
+            <span className="text-sm font-semibold hidden sm:inline">Chat with Blaze</span>
+            <span className="text-sm font-semibold sm:hidden">Blaze</span>
           </span>
         </button>
       )}
@@ -101,14 +125,14 @@ export function AiChatWidget() {
         <div
           className="fixed inset-x-0 bottom-0 sm:inset-x-auto sm:right-5 sm:bottom-5 z-50 sm:w-[380px] max-h-[85vh] sm:max-h-[600px] flex flex-col rounded-t-2xl sm:rounded-2xl border border-border bg-background/95 backdrop-blur-xl shadow-2xl shadow-black/50 overflow-hidden animate-in slide-in-from-bottom duration-200"
           role="dialog"
-          aria-label="AI Concierge chat"
+          aria-label="Blaze AI concierge"
         >
           <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-gradient-to-r from-accent/20 to-transparent">
             <span className="w-9 h-9 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-accent" />
+              <Flame className="w-4 h-4 text-accent" />
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold">{dealership.brand.name} AI</p>
+              <p className="text-sm font-bold">Blaze · {dealership.brand.name}</p>
               <p className="text-[0.65rem] uppercase tracking-wider text-accent">Online · Multilingual</p>
             </div>
             <button onClick={() => setOpen(false)} className="p-1.5 rounded hover:bg-white/10" aria-label="Close chat">
@@ -134,14 +158,15 @@ export function AiChatWidget() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                send();
+                void send();
               }}
               className="flex gap-2"
             >
               <input
+                ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your message…"
+                placeholder="Ask Blaze anything…"
                 className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-accent"
                 disabled={loading}
               />
