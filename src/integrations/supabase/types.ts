@@ -201,6 +201,33 @@ export type Database = {
           },
         ]
       }
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          path: string
+          referrer: string | null
+          session_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          path: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          path?: string
+          referrer?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -225,6 +252,63 @@ export type Database = {
           id?: string
           phone?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      site_config: {
+        Row: {
+          active: boolean
+          address: string | null
+          brand_name: string
+          created_at: string
+          currency: string | null
+          email: string | null
+          id: string
+          key: string
+          logo_url: string | null
+          phone: string | null
+          primary_color: string | null
+          seo_description: string | null
+          seo_title: string | null
+          tagline: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          active?: boolean
+          address?: string | null
+          brand_name?: string
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          id?: string
+          key?: string
+          logo_url?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          tagline?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          active?: boolean
+          address?: string | null
+          brand_name?: string
+          created_at?: string
+          currency?: string | null
+          email?: string | null
+          id?: string
+          key?: string
+          logo_url?: string | null
+          phone?: string | null
+          primary_color?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          tagline?: string | null
+          updated_at?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
