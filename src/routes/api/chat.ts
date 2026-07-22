@@ -207,6 +207,66 @@ async function saveLead(
   return JSON.stringify({ ok: true, lead_id: leadId, escalated });
 }
 
+async function bookTestDrive(args: Record<string, any>, validVehicleIds: Set<string>): Promise<string> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const client = supabaseAdmin as unknown as { from: (t: string) => any };
+  const payload: Record<string, unknown> = {
+    vehicle_name: args.interested_vehicle ?? null,
+    name: args.name ?? null,
+    phone: args.phone ?? null,
+    email: args.email ?? null,
+    preferred_date: args.preferred_date ?? null,
+    notes: [args.preferred_time && `Time: ${args.preferred_time}`, args.notes].filter(Boolean).join(' · ') || null,
+  };
+  if (typeof args.vehicle_id === 'string' && validVehicleIds.has(args.vehicle_id)) payload.vehicle_id = args.vehicle_id;
+  const { data, error } = await client.from('test_drive_requests').insert(payload).select('id').single();
+  if (error) return JSON.stringify({ ok: false, error: error.message });
+  void notifySales({ type: 'test_drive', ...payload }).catch(() => {});
+  return JSON.stringify({ ok: true, id: data?.id });
+}
+
+async function submitTradeIn(args: Record<string, any>): Promise<string> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const client = supabaseAdmin as unknown as { from: (t: string) => any };
+  const payload = {
+    name: args.name ?? null,
+    phone: args.phone ?? null,
+    email: args.email ?? null,
+    make: args.make ?? null,
+    model: args.model ?? null,
+    year: args.year ?? null,
+    mileage_km: args.mileage_km ?? null,
+    condition: args.condition ?? null,
+    estimated_value_kes: args.expected_value_kes ?? null,
+    notes: args.notes ?? null,
+  };
+  const { data, error } = await client.from('trade_in_requests').insert(payload).select('id').single();
+  if (error) return JSON.stringify({ ok: false, error: error.message });
+  void notifySales({ type: 'trade_in', ...payload }).catch(() => {});
+  return JSON.stringify({ ok: true, id: data?.id });
+}
+
+async function submitFinance(args: Record<string, any>, validVehicleIds: Set<string>): Promise<string> {
+  const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+  const client = supabaseAdmin as unknown as { from: (t: string) => any };
+  const payload: Record<string, unknown> = {
+    vehicle_name: args.interested_vehicle ?? null,
+    name: args.name ?? null,
+    phone: args.phone ?? null,
+    email: args.email ?? null,
+    vehicle_price: args.price_kes ?? null,
+    deposit: args.deposit_kes ?? null,
+    term_months: args.term_months ?? null,
+    monthly_income: args.monthly_income_kes ?? null,
+    notes: [args.employment_status && `Employment: ${args.employment_status}`, args.notes].filter(Boolean).join(' · ') || null,
+  };
+  if (typeof args.vehicle_id === 'string' && validVehicleIds.has(args.vehicle_id)) payload.vehicle_id = args.vehicle_id;
+  const { data, error } = await client.from('finance_requests').insert(payload).select('id').single();
+  if (error) return JSON.stringify({ ok: false, error: error.message });
+  void notifySales({ type: 'finance', ...payload }).catch(() => {});
+  return JSON.stringify({ ok: true, id: data?.id });
+
+
 async function notifySales(lead: Record<string, unknown>) {
   const key = process.env.LOVABLE_API_KEY;
   if (!key) return;
