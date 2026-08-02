@@ -13,11 +13,13 @@ const PRIMARY = [
 const SECONDARY = [
   { to: '/about', label: 'About' },
   { to: '/services', label: 'Services' },
+  { to: '/', hash: 'delivery', label: 'Delivery & Tracking' },
   { to: '/testimonials', label: 'Testimonials' },
   { to: '/faqs', label: 'FAQs' },
   { to: '/contact', label: 'Contact' },
   { to: '/favorites', label: 'Favourites & Compare' },
 ] as const;
+
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -54,7 +56,13 @@ export function Header() {
           to="/"
           aria-label="AYAD Automotives — Home"
           className="text-lg md:text-2xl font-bold display-font tracking-[0.18em] text-white hover:text-accent transition-colors shrink-0"
-          onClick={() => setOpen(false)}
+          onClick={(e) => {
+            setOpen(false);
+            if (window.location.pathname === '/') {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          }}
         >
           AYAD <span className="text-accent">AUTOMOTIVES</span>
         </Link>
@@ -121,7 +129,7 @@ export function Header() {
                     <Separator />
                   </div>
                   {SECONDARY.map((n) => (
-                    <MenuLink key={n.to} to={n.to} onClick={() => setOpen(false)}>
+                    <MenuLink key={n.label} to={n.to} hash={'hash' in n ? n.hash : undefined} onClick={() => setOpen(false)}>
                       {n.label}
                     </MenuLink>
                   ))}
@@ -146,16 +154,19 @@ export function Header() {
 
 function MenuLink({
   to,
+  hash,
   onClick,
   children,
 }: {
   to: string;
+  hash?: string;
   onClick: () => void;
   children: React.ReactNode;
 }) {
   return (
     <Link
       to={to}
+      hash={hash}
       activeProps={{ className: 'text-accent bg-white/5' }}
       onClick={onClick}
       className="block px-4 py-2.5 text-[0.72rem] uppercase tracking-[0.22em] font-semibold text-white/80 hover:bg-white/10 hover:text-accent transition-colors"

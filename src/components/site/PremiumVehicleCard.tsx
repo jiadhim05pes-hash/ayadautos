@@ -13,7 +13,7 @@ import {
   Car as CarIcon,
 } from 'lucide-react';
 import type { Vehicle } from '@/lib/inventory-data';
-import { formatKes, waLink } from '@/lib/inventory-data';
+import { formatKes, stockId, waLink } from '@/lib/inventory-data';
 import { useVehicleList } from '@/hooks/use-vehicle-lists';
 import { openBlaze } from '@/hooks/use-blaze-chat';
 import { cn } from '@/lib/utils';
@@ -27,7 +27,7 @@ interface Props {
 /**
  * Premium vehicle card — used identically on Home and Inventory pages.
  * - Cursor-follow radial spotlight on hover (CSS custom props updated in rAF).
- * - Spec icons instead of text labels.
+ * - Stock ID, status + registration badges, spec icons.
  * - Actions: Favourite · Compare · Finance · Test Drive · WhatsApp · Details.
  */
 export const PremiumVehicleCard = memo(function PremiumVehicleCard({
@@ -54,13 +54,20 @@ export const PremiumVehicleCard = memo(function PremiumVehicleCard({
 
   const isFav = favs.has(v.id);
   const isComp = comp.has(v.id);
+  const stock = stockId(v.id);
 
   const inquireHref = waLink(
-    `Hello! I'm interested in the ${v.name} (${v.year}, ${formatKes(v.priceKes)}). Please share more details.`,
+    `Hello! I'm interested in the ${v.name} (${v.year}, ${formatKes(v.priceKes)}, Stock ${stock}). Please share more details.`,
   );
-  const testDriveHref = waLink(
-    `Hello Ayad Automotives! I'd like to book a test drive for the ${v.name} (${v.year}).`,
-  );
+
+  const statusClass =
+    v.status === 'reserved'
+      ? 'border-amber-400/40 bg-amber-400/15 text-amber-300'
+      : v.status === 'sold'
+        ? 'border-white/20 bg-black/70 text-white/60'
+        : 'border-accent/40 bg-accent/15 text-accent';
+  const statusLabel =
+    v.status === 'reserved' ? 'Reserved' : v.status === 'sold' ? 'Sold' : 'Available';
 
   return (
     <article
@@ -83,15 +90,25 @@ export const PremiumVehicleCard = memo(function PremiumVehicleCard({
       <div className="relative h-52 overflow-hidden">
         <img
           src={v.image}
-          alt={v.name}
+          alt={`${v.year} ${v.name} for sale at Ayad Automotives`}
           loading="lazy"
           decoding="async"
           className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
         />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0B0D12] to-transparent" />
-        <span className="absolute left-3 top-3 rounded-full bg-black/70 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-white backdrop-blur">
-          {v.registration}
-        </span>
+        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+          <span
+            className={cn(
+              'rounded-full border px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wider backdrop-blur',
+              statusClass,
+            )}
+          >
+            {statusLabel}
+          </span>
+          <span className="rounded-full bg-black/70 px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-wider text-white backdrop-blur">
+            {v.registration}
+          </span>
+        </div>
         <span className="absolute right-3 top-3 rounded-full border border-accent/30 bg-black/60 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-wider text-accent backdrop-blur">
           {v.year}
         </span>
@@ -117,9 +134,12 @@ export const PremiumVehicleCard = memo(function PremiumVehicleCard({
 
       {/* Body */}
       <div className="relative p-5">
-        <h3 className="font-display text-lg font-bold leading-tight text-white">
-          {v.name}
-        </h3>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-display text-lg font-bold leading-tight text-white">{v.name}</h3>
+          <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-[0.6rem] font-semibold tracking-[0.15em] text-white/50">
+            {stock}
+          </span>
+        </div>
         <p className="mt-1 text-[0.7rem] uppercase tracking-[0.2em] text-white/40">
           {v.make} · {v.category}
         </p>
@@ -174,13 +194,22 @@ export const PremiumVehicleCard = memo(function PremiumVehicleCard({
           >
             <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
           </a>
-          <Link
-            to="/inventory"
-            hash={v.id}
-            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-white/[0.04] px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white"
-          >
-            Details <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          {v.slug ? (
+            <Link
+              to="/vehicle/$slug"
+              params={{ slug: v.slug }}
+              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-white/[0.04] px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white"
+            >
+              Details <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <Link
+              to="/inventory"
+              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-white/[0.04] px-3 py-2 text-xs font-semibold uppercase tracking-wider text-white/80 transition-colors hover:bg-white/[0.08] hover:text-white"
+            >
+              Details <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          )}
         </div>
       </div>
     </article>
@@ -210,19 +239,27 @@ function IconToggle({
   label: string;
 }) {
   return (
-    <button
-      type="button"
-      aria-label={label}
-      aria-pressed={active}
-      onClick={onClick}
-      className={cn(
-        'grid h-8 w-8 place-items-center rounded-full border backdrop-blur transition-all',
-        active
-          ? 'border-accent bg-accent text-accent-foreground shadow-[0_0_12px_-2px_var(--accent)]'
-          : 'border-white/20 bg-black/50 text-white/85 hover:border-accent hover:text-accent',
-      )}
-    >
-      {children}
-    </button>
+    <span className="group/tip relative">
+      <button
+        type="button"
+        aria-label={label}
+        aria-pressed={active}
+        onClick={onClick}
+        className={cn(
+          'grid h-8 w-8 place-items-center rounded-full border backdrop-blur transition-all',
+          active
+            ? 'border-accent bg-accent text-accent-foreground shadow-[0_0_12px_-2px_var(--accent)]'
+            : 'border-white/20 bg-black/50 text-white/85 hover:border-accent hover:text-accent',
+        )}
+      >
+        {children}
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute bottom-full right-0 mb-2 w-max max-w-[11rem] translate-y-1 rounded-md border border-white/10 bg-black/90 px-2.5 py-1.5 text-[0.6rem] font-semibold uppercase tracking-wider text-white/90 opacity-0 shadow-xl backdrop-blur transition-all duration-200 group-hover/tip:translate-y-0 group-hover/tip:opacity-100"
+      >
+        {label}
+      </span>
+    </span>
   );
 }

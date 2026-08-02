@@ -57,7 +57,7 @@ function InventoryPage() {
     else if (sort === 'year-desc') list = [...list].sort((a, b) => b.year - a.year);
     else list = [...list].sort((a, b) => Number(b.featured) - Number(a.featured));
     return list;
-  }, [sp, sort]);
+  }, [sp, sort, vehicles]);
 
   const activeFilters = [sp.make, sp.model, sp.body, sp.fuel, sp.trans].filter(Boolean) as string[];
 

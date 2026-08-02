@@ -41,6 +41,11 @@ export const formatKes = (n: number) =>
 export const waLink = (msg: string) =>
   `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
 
+/** Human-friendly showroom stock reference derived from the vehicle UUID. */
+export const stockId = (id: string) =>
+  `AYD-${id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase()}`;
+
+
 const FALLBACK_IMG =
   'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect width="800" height="500" fill="%230b0d12"/><text x="50%" y="50%" text-anchor="middle" fill="%23444" font-family="sans-serif" font-size="28">No image</text></svg>';
 
