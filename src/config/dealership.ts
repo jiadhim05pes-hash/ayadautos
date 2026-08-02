@@ -28,3 +28,12 @@ export const dealership = {
 } as const;
 
 export type Dealership = typeof dealership;
+
+export type SocialKey = 'instagram' | 'tiktok' | 'facebook' | 'linkedin';
+
+export const SOCIALS: { key: SocialKey; label: string; href: string }[] = [
+  { key: 'instagram', label: 'Instagram', href: 'https://instagram.com/ayad_nexas' },
+  { key: 'tiktok', label: 'TikTok', href: 'https://www.tiktok.com/@ayadnexas' },
+  { key: 'facebook', label: 'Facebook', href: 'https://www.facebook.com/ayadnexas' },
+  { key: 'linkedin', label: 'LinkedIn', href: 'https://www.linkedin.com/in/ibrahim-adan' },
+];
