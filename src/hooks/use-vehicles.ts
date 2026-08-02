@@ -40,6 +40,44 @@ export function useFeaturedVehicles(limit = 6) {
   return { data: data ?? [], isLoading, error };
 }
 
+export interface VehicleDetail extends Vehicle {
+  description: string | null;
+  features: string[];
+  images: string[];
+}
+
+async function fetchVehicleBySlug(slug: string): Promise<VehicleDetail | null> {
+  const client = supabase as unknown as { from: (t: string) => any };
+  const { data, error } = await client
+    .from('vehicles')
+    .select('*, categories ( name ), vehicle_images ( url, sort_order )')
+    .eq('slug', slug)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  const row = data as Row & { vehicle_images: { url: string; sort_order: number }[] | null };
+  const base = mapVehicleRow(row, row.categories?.name);
+  const gallery = (row.vehicle_images ?? [])
+    .slice()
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((i) => i.url);
+  return {
+    ...base,
+    description: row.description ?? null,
+    features: Array.isArray(row.features) ? (row.features as string[]) : [],
+    images: [base.image, ...gallery.filter((u) => u && u !== base.image)],
+  };
+}
+
+export function useVehicleBySlug(slug: string) {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['vehicle', slug],
+    queryFn: () => fetchVehicleBySlug(slug),
+    staleTime: 60_000,
+  });
+  return { data: data ?? null, isLoading, error };
+}
+
 export function useCategories() {
   const { data, isLoading, error } = useQuery({
     queryKey: ['categories'],
