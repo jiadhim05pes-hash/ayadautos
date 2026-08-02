@@ -3,6 +3,7 @@ import { PageHero } from '@/components/site/PageHero';
 import { Card } from '@/components/ui/card';
 import { MapPin, Phone, MessageCircle, Mail, Clock } from 'lucide-react';
 import { waLink, PHONE_DISPLAY, LOCATION_DISPLAY } from '@/lib/inventory-data';
+import { SocialLinks } from '@/components/site/Footer';
 
 export const Route = createFileRoute('/contact')({
   head: () => ({
@@ -51,6 +52,11 @@ function ContactPage() {
               <h3 className="font-bold mb-1">Hours</h3>
               <p className="text-sm text-muted-foreground">Mon–Sat · 8:30 – 18:00</p>
             </Card>
+          </div>
+
+          <div className="mt-12 text-center">
+            <p className="text-[0.65rem] uppercase tracking-[0.4em] text-accent mb-4">Follow Ayad Automotives</p>
+            <SocialLinks className="justify-center" />
           </div>
 
           <div className="mt-10 text-center">

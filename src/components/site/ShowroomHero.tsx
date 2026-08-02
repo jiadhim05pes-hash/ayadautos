@@ -243,7 +243,7 @@ export function ShowroomHero() {
                   className="absolute inset-0 flex flex-col items-center justify-center will-change-[opacity,transform]"
                 >
                   <p className="text-[0.6rem] sm:text-xs uppercase tracking-[0.5em] text-accent mb-3">
-                    Ngong Road · Nairobi
+                    Welcome
                   </p>
                   <h1 className="serif-display metallic-text text-4xl sm:text-6xl md:text-7xl font-medium leading-[1.05] tracking-[0.06em]">
                     {s.title}
@@ -287,7 +287,7 @@ export function ShowroomHero() {
 
           <div
             ref={scrollHintRef}
-            className="absolute top-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 will-change-[opacity]"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 will-change-[opacity]"
           >
             <span className="text-[0.6rem] uppercase tracking-[0.4em] text-muted-foreground">Scroll</span>
             <span className="h-10 w-px bg-gradient-to-b from-accent to-transparent" />

@@ -117,7 +117,7 @@ function Home() {
       </section>
 
       {/* Nationwide Delivery */}
-      <section className="py-20 bg-background">
+      <section id="delivery" className="py-20 bg-background scroll-mt-24">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center max-w-2xl mx-auto mb-10">
             <p className="text-[0.65rem] uppercase tracking-[0.5em] text-accent mb-3">Nationwide Delivery</p>
@@ -146,9 +146,9 @@ function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
-              { name: 'James Mwangi', role: 'Business Owner', text: 'Excellent service and quality vehicles. Highly recommended!' },
-              { name: 'Sarah Kipchoge', role: 'Executive', text: 'Best dealership experience in Nairobi. Professional and trustworthy.' },
-              { name: 'David Okonkwo', role: 'Entrepreneur', text: 'Great financing options and support throughout the process.' },
+              { name: 'James Mwangi', role: 'Business Owner', text: 'Excellent service and quality vehicles. The team handled everything from selection to financing \u2014 I drove off in two weeks.' },
+              { name: 'Sarah Kipchoge', role: 'Executive', text: 'Best dealership experience in Nairobi. Professional, transparent paperwork, and a beautiful Lexus RX delivered as promised.' },
+              { name: 'David Okonkwo', role: 'Entrepreneur', text: 'Great financing options and support throughout the process. They walked me through the SACCO option which saved me thousands.' },
             ].map((t) => (
               <Card key={t.name} className="glass p-6">
                 <div className="flex gap-1 mb-3" aria-label="5 out of 5 stars">
@@ -156,7 +156,7 @@ function Home() {
                     <Star key={k} className="w-4 h-4 fill-[color:var(--accent)] text-[color:var(--accent)]" />
                   ))}
                 </div>
-                <p className="text-muted-foreground italic mb-4 text-sm">"{t.text}"</p>
+                <p className="text-muted-foreground italic mb-4 text-sm leading-relaxed">"{t.text}"</p>
                 <p className="font-semibold text-sm">{t.name}</p>
                 <p className="text-xs text-muted-foreground">{t.role}</p>
               </Card>
