@@ -13,11 +13,13 @@ const PRIMARY = [
 const SECONDARY = [
   { to: '/about', label: 'About' },
   { to: '/services', label: 'Services' },
+  { to: '/#delivery', label: 'Delivery & Tracking' },
   { to: '/testimonials', label: 'Testimonials' },
   { to: '/faqs', label: 'FAQs' },
   { to: '/contact', label: 'Contact' },
   { to: '/favorites', label: 'Favourites & Compare' },
 ] as const;
+
 
 export function Header() {
   const [open, setOpen] = useState(false);
