@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Search } from 'lucide-react';
-import { vehicles } from '@/lib/inventory-data';
+import { useVehicles } from '@/hooks/use-vehicles';
 
 const FUELS = ['Any', 'Petrol', 'Diesel', 'Hybrid', 'Electric'] as const;
 const TRANS = ['Any', 'Automatic', 'Manual'] as const;
@@ -21,12 +21,12 @@ interface Props {
 
 /**
  * Luxury dealership search toolbar.
- * Used floating over the hero (with `floating`) and as the top filter bar
- * on the Inventory page. Submitting navigates to /inventory with the
- * chosen filters serialised into search params.
+ * Brand → Model is dependent: picking Toyota narrows models to Toyota models.
+ * Submitting navigates to /inventory with the chosen filters as search params.
  */
 export function InventorySearchBar({ floating, className = '' }: Props) {
   const navigate = useNavigate();
+  const { data: vehicles } = useVehicles();
   const [make, setMake] = useState('Any');
   const [model, setModel] = useState('Any');
   const [body, setBody] = useState<(typeof BODY)[number]>('Any');
@@ -36,7 +36,7 @@ export function InventorySearchBar({ floating, className = '' }: Props) {
 
   const makes = useMemo(
     () => ['Any', ...Array.from(new Set(vehicles.map((v) => v.make))).sort()],
-    [],
+    [vehicles],
   );
   const models = useMemo(() => {
     const list =
@@ -44,7 +44,7 @@ export function InventorySearchBar({ floating, className = '' }: Props) {
         ? vehicles.map((v) => v.model)
         : vehicles.filter((v) => v.make === make).map((v) => v.model);
     return ['Any', ...Array.from(new Set(list)).sort()];
-  }, [make]);
+  }, [make, vehicles]);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,16 +77,28 @@ export function InventorySearchBar({ floating, className = '' }: Props) {
           Smart Inventory Search
         </p>
         <span className="hidden sm:block text-[0.65rem] uppercase tracking-[0.3em] text-white/40">
-          Find your next executive vehicle
+          Refine {vehicles.length || ''} executive vehicles
         </span>
       </div>
 
       <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-6">
-        <Select label="Make" value={make} onChange={(v) => { setMake(v); setModel('Any'); }} options={makes} />
-        <Select label="Model" value={model} onChange={setModel} options={models} />
-        <Select label="Body Type" value={body} onChange={(v) => setBody(v as typeof body)} options={[...BODY]} />
-        <Select label="Fuel" value={fuel} onChange={(v) => setFuel(v as typeof fuel)} options={[...FUELS]} />
-        <Select label="Transmission" value={trans} onChange={(v) => setTrans(v as typeof trans)} options={[...TRANS]} />
+        <Select
+          label="Brand"
+          value={make}
+          onChange={(v) => { setMake(v); setModel('Any'); }}
+          options={makes}
+          anyLabel="All brands"
+        />
+        <Select
+          label="Model"
+          value={model}
+          onChange={setModel}
+          options={models}
+          anyLabel={make === 'Any' ? 'All models' : `All ${make} models`}
+        />
+        <Select label="Body Type" value={body} onChange={(v) => setBody(v as typeof body)} options={[...BODY]} anyLabel="All body types" />
+        <Select label="Fuel" value={fuel} onChange={(v) => setFuel(v as typeof fuel)} options={[...FUELS]} anyLabel="Any fuel" />
+        <Select label="Transmission" value={trans} onChange={(v) => setTrans(v as typeof trans)} options={[...TRANS]} anyLabel="Any transmission" />
         <label className="flex flex-col">
           <span className="mb-1 text-[0.6rem] uppercase tracking-[0.25em] text-white/50">Budget</span>
           <select
@@ -116,11 +128,13 @@ function Select({
   value,
   onChange,
   options,
+  anyLabel,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   options: string[];
+  anyLabel?: string;
 }) {
   return (
     <label className="flex flex-col">
@@ -134,7 +148,7 @@ function Select({
       >
         {options.map((o) => (
           <option key={o} value={o}>
-            {o}
+            {o === 'Any' ? (anyLabel ?? 'Any') : o}
           </option>
         ))}
       </select>
