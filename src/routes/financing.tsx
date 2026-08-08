@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { PageHero } from '@/components/site/PageHero';
 import { LoanCalculator } from '@/components/site/LoanCalculator';
 import { Card } from '@/components/ui/card';
 import { Building2, Users, FileCheck, Headphones } from 'lucide-react';
+import { stockId } from '@/lib/inventory-data';
 import { useVehicles } from '@/hooks/use-vehicles';
+
 
 export const Route = createFileRoute('/financing')({
   validateSearch: (s: Record<string, unknown>) => ({
