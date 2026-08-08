@@ -47,6 +47,21 @@ const DELIVERY = [
 
 function Home() {
   const { data: featured } = useFeaturedVehicles(6);
+  const { data: all } = useVehicles();
+  const [query, setQuery] = useState<MiniSearchQuery | null>(null);
+
+  const shown = useMemo(() => {
+    if (!query) return featured;
+    return all.filter(
+      (v) =>
+        (!query.make || v.make === query.make) &&
+        (!query.model || v.model === query.model) &&
+        (!query.maxBudget || v.priceKes <= query.maxBudget) &&
+        (!query.trans || v.transmission === query.trans),
+    );
+  }, [query, featured, all]);
+
+
 
   return (
     <div className="bg-background text-foreground">
