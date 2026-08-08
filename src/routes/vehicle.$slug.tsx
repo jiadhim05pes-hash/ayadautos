@@ -239,27 +239,21 @@ function VehicleDetailPage() {
                 >
                   <CalendarCheck className="h-4 w-4" /> Test Drive
                 </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    openBlaze({
-                      intent: 'finance',
-                      autoSend: true,
-                      prompt: `Please help me finance the ${v.year} ${v.name} (${formatKes(v.priceKes)}).`,
-                    })
-                  }
+                <Link
+                  to="/financing"
+                  search={{ id: v.id, price: v.priceKes }}
                   className="inline-flex items-center justify-center gap-2 rounded-md border border-white/15 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white/90 hover:border-accent hover:text-accent"
                 >
                   <Calculator className="h-4 w-4" /> Finance
-                </button>
-                <a
-                  href={wa}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="col-span-2 inline-flex items-center justify-center gap-2 rounded-md border border-[#25D366]/40 bg-[#25D366]/10 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#25D366] hover:bg-[#25D366]/20"
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => openBlaze({ intent: 'inquiry', autoSend: true, prompt: inquiryPrompt })}
+                  className="col-span-2 inline-flex items-center justify-center gap-2 rounded-md border border-accent/40 bg-accent/10 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-accent hover:bg-accent/20"
                 >
-                  <MessageCircle className="h-4 w-4" /> Enquire on WhatsApp
-                </a>
+                  <MessageCircle className="h-4 w-4" /> Inquire
+                </button>
+
               </div>
 
               <p className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
