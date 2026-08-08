@@ -103,11 +103,17 @@ function Home() {
             <h2 className="section-title">Featured Inventory</h2>
             <p className="text-muted-foreground">Handpicked vehicles ready for viewing in Nairobi.</p>
           </div>
+          <MiniSmartSearch vehicles={all} onSearch={setQuery} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((v) => (
+            {shown.map((v) => (
               <PremiumVehicleCard key={v.id} vehicle={v} />
             ))}
           </div>
+          {query && shown.length === 0 && (
+            <p className="text-center text-sm text-muted-foreground mt-8">
+              No vehicles match your search. Try widening your filters or view the full inventory.
+            </p>
+          )}
           <div className="text-center mt-10">
             <Link to="/inventory" className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 rounded-md font-semibold">
               View Full Inventory <ArrowRight className="w-4 h-4" />
@@ -115,6 +121,7 @@ function Home() {
           </div>
         </div>
       </section>
+
 
       {/* Nationwide Delivery */}
       <section id="delivery" className="py-20 bg-background scroll-mt-24">
