@@ -107,9 +107,17 @@ function VehicleDetailPage() {
     .filter((r) => r.id !== v.id && (r.make === v.make || r.category === v.category))
     .slice(0, 4);
 
-  const wa = waLink(
-    `Hello Ayad Automotives! I'm interested in ${v.name} (Stock ${stockId(v.id)}, ${formatKes(v.priceKes)}).`,
-  );
+  const inquiryPrompt = [
+    `I'm enquiring about the ${v.year} ${v.name}.`,
+    `Stock ID: ${stockId(v.id)}`,
+    `Price: ${formatKes(v.priceKes)}`,
+    `Specs: ${v.transmission} · ${v.fuel} · ${v.mileageKm.toLocaleString()} km · ${v.registration} · ${v.category}`,
+    v.features.length ? `Features: ${v.features.slice(0, 10).join(', ')}` : '',
+    `Please answer my questions about this vehicle.`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
 
   return (
     <>
