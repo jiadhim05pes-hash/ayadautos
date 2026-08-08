@@ -13,7 +13,7 @@ import {
   Car as CarIcon,
 } from 'lucide-react';
 import type { Vehicle } from '@/lib/inventory-data';
-import { formatKes, stockId, waLink } from '@/lib/inventory-data';
+import { formatKes, stockId } from '@/lib/inventory-data';
 import { useVehicleList } from '@/hooks/use-vehicle-lists';
 import { openBlaze } from '@/hooks/use-blaze-chat';
 import { cn } from '@/lib/utils';
