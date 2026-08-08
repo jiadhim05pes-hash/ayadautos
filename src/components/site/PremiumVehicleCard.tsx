@@ -154,21 +154,15 @@ export const PremiumVehicleCard = memo(function PremiumVehicleCard({
           <Spec icon={<CarIcon className="h-4 w-4" />} label={v.category === 'Family Car' ? 'Family' : v.category} />
         </ul>
 
-        {/* Primary actions — route through Blaze for structured lead capture */}
+        {/* Primary actions — Finance opens the calculator, others route through Blaze */}
         <div className="mt-5 grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() =>
-              openBlaze({
-                intent: 'finance',
-                autoSend: true,
-                prompt: `I'd like to explore financing for the ${v.year} ${v.name} (${formatKes(v.priceKes)}). Please help me estimate monthly payments and start a finance application.`,
-              })
-            }
+          <Link
+            to="/financing"
+            search={{ id: v.id, price: v.priceKes }}
             className="inline-flex items-center justify-center gap-1.5 rounded-md bg-accent px-3 py-2 text-xs font-semibold uppercase tracking-wider text-accent-foreground transition-colors hover:bg-accent/90"
           >
             <Calculator className="h-3.5 w-3.5" /> Finance
-          </button>
+          </Link>
           <button
             type="button"
             onClick={() =>
@@ -186,14 +180,13 @@ export const PremiumVehicleCard = memo(function PremiumVehicleCard({
 
 
         <div className="mt-2 grid grid-cols-2 gap-2">
-          <a
-            href={inquireHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1.5 rounded-md border border-[#25D366]/40 bg-[#25D366]/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-[#25D366] transition-colors hover:bg-[#25D366]/20"
+          <button
+            type="button"
+            onClick={() => openBlaze({ intent: 'inquiry', autoSend: true, prompt: inquiryPrompt })}
+            className="inline-flex items-center justify-center gap-1.5 rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-accent transition-colors hover:bg-accent/20"
           >
-            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
-          </a>
+            <MessageCircle className="h-3.5 w-3.5" /> Inquire
+          </button>
           {v.slug ? (
             <Link
               to="/vehicle/$slug"
@@ -211,6 +204,7 @@ export const PremiumVehicleCard = memo(function PremiumVehicleCard({
             </Link>
           )}
         </div>
+
       </div>
     </article>
   );
