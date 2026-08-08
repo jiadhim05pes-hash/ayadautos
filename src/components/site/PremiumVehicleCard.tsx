@@ -56,9 +56,14 @@ export const PremiumVehicleCard = memo(function PremiumVehicleCard({
   const isComp = comp.has(v.id);
   const stock = stockId(v.id);
 
-  const inquireHref = waLink(
-    `Hello! I'm interested in the ${v.name} (${v.year}, ${formatKes(v.priceKes)}, Stock ${stock}). Please share more details.`,
-  );
+  const inquiryPrompt = [
+    `I'm enquiring about the ${v.year} ${v.name}.`,
+    `Stock ID: ${stock}`,
+    `Price: ${formatKes(v.priceKes)}`,
+    `Specs: ${v.transmission} · ${v.fuel} · ${v.mileageKm.toLocaleString()} km · ${v.registration} · ${v.category}`,
+    `Please answer my questions about this vehicle.`,
+  ].join('\n');
+
 
   const statusClass =
     v.status === 'reserved'
