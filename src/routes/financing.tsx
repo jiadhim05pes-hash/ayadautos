@@ -46,7 +46,14 @@ function FinancingPage() {
       />
       <section className="py-12 bg-background">
         <div className="container mx-auto px-4 max-w-5xl">
-          <LoanCalculator initialPrice={price ?? vehicle?.priceKes} />
+          <LoanCalculator
+            initialPrice={price ?? vehicle?.priceKes}
+            vehicle={
+              vehicle
+                ? { id: vehicle.id, name: vehicle.name, stock: stockId(vehicle.id), priceKes: vehicle.priceKes }
+                : undefined
+            }
+          />
         </div>
       </section>
       <section className="py-16 bg-card">
@@ -61,11 +68,9 @@ function FinancingPage() {
               </Card>
             ))}
           </div>
-          <div className="text-center mt-10">
-            <Link to="/contact" className="inline-block bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 rounded-md font-semibold">Request a financing quote</Link>
-          </div>
         </div>
       </section>
+
     </>
   );
 }
