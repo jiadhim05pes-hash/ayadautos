@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
+import { Flame } from 'lucide-react';
+import { openBlaze } from '@/hooks/use-blaze-chat';
 
 /**
  * Multi-currency loan payment calculator.
@@ -41,10 +43,25 @@ function computeLoan(price: number, down: number, months: number, annualRatePct:
   return { monthly, totalInterest, totalCost, principal, months };
 }
 
-export function LoanCalculator({ initialPrice }: { initialPrice?: number } = {}) {
+/** Thousands-separated display for numeric inputs (e.g. 2,350,000). */
+const group = (n: number) => (isFinite(n) ? n : 0).toLocaleString('en-US');
+const parseNum = (s: string) => Number(s.replace(/[^\d]/g, '')) || 0;
+
+export interface CalculatorVehicle {
+  id?: string;
+  name: string;
+  stock?: string;
+  priceKes: number;
+}
+
+export function LoanCalculator({
+  initialPrice,
+  vehicle,
+}: { initialPrice?: number; vehicle?: CalculatorVehicle } = {}) {
   const [currency, setCurrency] = useState<Currency>('KES');
-  const [price, setPrice] = useState(initialPrice ?? 3_500_000);
-  const [down, setDown] = useState(Math.round((initialPrice ?? 3_500_000) * 0.2));
+  const basePrice = initialPrice ?? vehicle?.priceKes ?? 3_500_000;
+  const [price, setPrice] = useState(basePrice);
+  const [down, setDown] = useState(Math.round(basePrice * 0.2));
   const [months, setMonths] = useState(48);
   const [rate, setRate] = useState(14);
 
@@ -56,11 +73,33 @@ export function LoanCalculator({ initialPrice }: { initialPrice?: number } = {})
       isFinite(n) ? n : 0,
     );
 
+  const requestQuote = () => {
+    const lines = [
+      `I'd like to request a finance quote.`,
+      vehicle ? `Vehicle: ${vehicle.name}` : null,
+      vehicle?.stock ? `Stock ID: ${vehicle.stock}` : null,
+      `Vehicle price: ${fmt(price)}`,
+      `Deposit: ${fmt(down)}`,
+      `Loan period: ${months} months`,
+      `Indicative rate: ${rate}% APR`,
+      `Estimated monthly repayment: ${fmt(result.monthly)}`,
+      `Amount financed: ${fmt(result.principal)}`,
+      `Please save this finance request for the team.`,
+    ].filter(Boolean);
+    openBlaze({ intent: 'finance', autoSend: true, prompt: lines.join('\n') });
+  };
+
   return (
     <Card className="glass p-6 md:p-8">
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-5">
           <h3 className="text-2xl font-bold display-font">Loan Payment Calculator</h3>
+          {vehicle && (
+            <p className="text-xs uppercase tracking-[0.25em] text-accent">
+              {vehicle.name}
+              {vehicle.stock ? ` · Stock ${vehicle.stock}` : ''}
+            </p>
+          )}
 
           <Field label="Currency">
             <select
@@ -76,21 +115,24 @@ export function LoanCalculator({ initialPrice }: { initialPrice?: number } = {})
 
           <Field label={`Vehicle Price (${cfg.code})`}>
             <input
-              type="number"
-              min={0}
-              value={price}
-              onChange={(e) => setPrice(Math.max(0, +e.target.value))}
+              type="text"
+              inputMode="numeric"
+              value={group(price)}
+              onChange={(e) => {
+                const v = parseNum(e.target.value);
+                setPrice(v);
+                if (down > v) setDown(v);
+              }}
               className="w-full bg-input border border-border rounded-md px-3 py-2 text-foreground"
             />
           </Field>
 
           <Field label={`Down Payment (${cfg.code})`}>
             <input
-              type="number"
-              min={0}
-              max={price}
-              value={down}
-              onChange={(e) => setDown(Math.min(price, Math.max(0, +e.target.value)))}
+              type="text"
+              inputMode="numeric"
+              value={group(down)}
+              onChange={(e) => setDown(Math.min(price, parseNum(e.target.value)))}
               className="w-full bg-input border border-border rounded-md px-3 py-2 text-foreground"
             />
             <input
@@ -134,9 +176,15 @@ export function LoanCalculator({ initialPrice }: { initialPrice?: number } = {})
           <Stat label="Total Interest" value={fmt(result.totalInterest)} />
           <Stat label="Total Cost (incl. down payment)" value={fmt(result.totalCost)} />
           <Stat label="Amount Financed" value={fmt(result.principal)} />
-          <p className="text-xs text-muted-foreground pt-2">
+          <button
+            type="button"
+            onClick={requestQuote}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-md bg-accent px-6 py-3.5 text-sm font-semibold uppercase tracking-[0.2em] text-accent-foreground transition-all hover:shadow-[0_0_24px_-4px_var(--accent)]"
+          >
+            <Flame className="w-4 h-4" /> Request a Finance Quote
+          </button>
+          <p className="text-xs text-muted-foreground pt-1">
             Indicative only. Final terms depend on the lender (bank or SACCO), your credit profile, and current market rates.
-            Contact us for a tailored quote.
           </p>
         </div>
       </div>
