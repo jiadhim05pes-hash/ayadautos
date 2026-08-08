@@ -13,7 +13,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { useVehicleBySlug, useVehicles } from '@/hooks/use-vehicles';
-import { formatKes, stockId, waLink } from '@/lib/inventory-data';
+import { formatKes, stockId } from '@/lib/inventory-data';
 import { PremiumVehicleCard } from '@/components/site/PremiumVehicleCard';
 import { openBlaze } from '@/hooks/use-blaze-chat';
 
