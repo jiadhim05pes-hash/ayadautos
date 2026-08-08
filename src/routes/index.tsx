@@ -1,11 +1,13 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { Card } from '@/components/ui/card';
 import { Star, ArrowRight, Car, TrendingUp, DollarSign, Wrench, Heart, FileText, Zap, Truck, ShieldCheck, MapPin } from 'lucide-react';
-import { useFeaturedVehicles } from '@/hooks/use-vehicles';
+import { useFeaturedVehicles, useVehicles } from '@/hooks/use-vehicles';
 import { CountUp } from '@/components/site/CountUp';
 import { PartnersMarquee } from '@/components/site/PartnersMarquee';
 import { PremiumVehicleCard } from '@/components/site/PremiumVehicleCard';
+import { MiniSmartSearch, type MiniSearchQuery } from '@/components/site/MiniSmartSearch';
+
 
 // Lazy-load the heavy scroll-driven hero so the header/nav paint instantly.
 const ShowroomHero = lazy(() =>
