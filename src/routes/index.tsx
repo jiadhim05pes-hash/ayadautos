@@ -1,11 +1,13 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { Card } from '@/components/ui/card';
 import { Star, ArrowRight, Car, TrendingUp, DollarSign, Wrench, Heart, FileText, Zap, Truck, ShieldCheck, MapPin } from 'lucide-react';
-import { useFeaturedVehicles } from '@/hooks/use-vehicles';
+import { useFeaturedVehicles, useVehicles } from '@/hooks/use-vehicles';
 import { CountUp } from '@/components/site/CountUp';
 import { PartnersMarquee } from '@/components/site/PartnersMarquee';
 import { PremiumVehicleCard } from '@/components/site/PremiumVehicleCard';
+import { MiniSmartSearch, type MiniSearchQuery } from '@/components/site/MiniSmartSearch';
+
 
 // Lazy-load the heavy scroll-driven hero so the header/nav paint instantly.
 const ShowroomHero = lazy(() =>
@@ -45,6 +47,21 @@ const DELIVERY = [
 
 function Home() {
   const { data: featured } = useFeaturedVehicles(6);
+  const { data: all } = useVehicles();
+  const [query, setQuery] = useState<MiniSearchQuery | null>(null);
+
+  const shown = useMemo(() => {
+    if (!query) return featured;
+    return all.filter(
+      (v) =>
+        (!query.make || v.make === query.make) &&
+        (!query.model || v.model === query.model) &&
+        (!query.maxBudget || v.priceKes <= query.maxBudget) &&
+        (!query.trans || v.transmission === query.trans),
+    );
+  }, [query, featured, all]);
+
+
 
   return (
     <div className="bg-background text-foreground">
@@ -103,11 +120,17 @@ function Home() {
             <h2 className="section-title">Featured Inventory</h2>
             <p className="text-muted-foreground">Handpicked vehicles ready for viewing in Nairobi.</p>
           </div>
+          <MiniSmartSearch vehicles={all} onSearch={setQuery} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((v) => (
+            {shown.map((v) => (
               <PremiumVehicleCard key={v.id} vehicle={v} />
             ))}
           </div>
+          {query && shown.length === 0 && (
+            <p className="text-center text-sm text-muted-foreground mt-8">
+              No vehicles match your search. Try widening your filters or view the full inventory.
+            </p>
+          )}
           <div className="text-center mt-10">
             <Link to="/inventory" className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 rounded-md font-semibold">
               View Full Inventory <ArrowRight className="w-4 h-4" />
@@ -115,6 +138,7 @@ function Home() {
           </div>
         </div>
       </section>
+
 
       {/* Nationwide Delivery */}
       <section id="delivery" className="py-20 bg-background scroll-mt-24">

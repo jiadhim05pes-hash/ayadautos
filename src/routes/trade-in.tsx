@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { PageHero } from '@/components/site/PageHero';
 import { Button } from '@/components/ui/button';
-import { Check, ChevronLeft, ChevronRight, Upload, MessageCircle } from 'lucide-react';
-import { waLink } from '@/lib/inventory-data';
+import { Check, ChevronLeft, ChevronRight, Upload, Flame } from 'lucide-react';
+import { openBlaze } from '@/hooks/use-blaze-chat';
 
 export const Route = createFileRoute('/trade-in')({
   head: () => ({
@@ -20,27 +20,81 @@ export const Route = createFileRoute('/trade-in')({
 });
 
 const YEARS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() - i));
-const CONDITIONS = ['Fair', 'Good', 'Excellent'] as const;
-const STEPS = ['Vehicle Basics', 'Condition', 'Your Details'] as const;
+const STEPS = ['Vehicle Basics', 'Auction Grade', 'Your Details'] as const;
+
+/** Japanese auction grading scale. */
+const GRADES = [
+  { code: 'S / 6', desc: 'Brand new or near-new condition' },
+  { code: '5', desc: 'Excellent' },
+  { code: '4.5', desc: 'Very Good' },
+  { code: '4', desc: 'Good' },
+  { code: '3.5', desc: 'Fair' },
+  { code: '3', desc: 'Poor' },
+  { code: 'R / RA', desc: 'Accident repaired' },
+] as const;
 
 function TradeInPage() {
   const [step, setStep] = useState(0);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     make: '', model: '', year: '', mileage: '',
-    condition: 1,
+    grade: '' as string,
     name: '', phone: '', email: '', photos: [] as string[],
   });
 
-  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
+  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => {
     setForm((f) => ({ ...f, [k]: v }));
+    setErrors((e) => ({ ...e, [k as string]: '' }));
+  };
 
-  const next = () => setStep((s) => Math.min(STEPS.length - 1, s + 1));
+  function validate(s: number) {
+    const e: Record<string, string> = {};
+    if (s === 0) {
+      if (!form.make.trim()) e.make = 'Make is required';
+      if (!form.model.trim()) e.model = 'Model is required';
+      if (!form.year) e.year = 'Year is required';
+      if (!form.mileage.trim() || Number(form.mileage) <= 0) e.mileage = 'Enter a valid mileage';
+    }
+    if (s === 1 && !form.grade) e.grade = 'Select an auction grade';
+    if (s === 2) {
+      if (!form.name.trim()) e.name = 'Full name is required';
+      if (!/^[+\d][\d\s-]{7,}$/.test(form.phone.trim())) e.phone = 'Enter a valid phone number';
+      if (form.email.trim() && !/^\S+@\S+\.\S+$/.test(form.email.trim())) e.email = 'Enter a valid email';
+    }
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  }
+
+  const next = () => {
+    if (!validate(step)) return;
+    setStep((s) => Math.min(STEPS.length - 1, s + 1));
+  };
   const back = () => setStep((s) => Math.max(0, s - 1));
 
-  const summary = `Hello Ayad Automotives! I'd like a trade-in valuation.\n\nMake: ${form.make}\nModel: ${form.model}\nYear: ${form.year}\nMileage: ${form.mileage} km\nCondition: ${CONDITIONS[form.condition]}\nName: ${form.name}\nPhone: ${form.phone}\nEmail: ${form.email}`;
+  const submit = () => {
+    if (!validate(2)) return;
+    const grade = GRADES.find((g) => g.code === form.grade);
+    const prompt = [
+      `I'd like to submit my vehicle for a trade-in valuation.`,
+      `Make: ${form.make}`,
+      `Model: ${form.model}`,
+      `Year: ${form.year}`,
+      `Mileage: ${Number(form.mileage).toLocaleString()} km`,
+      `Auction grade: ${form.grade}${grade ? ` (${grade.desc})` : ''}`,
+      `Name: ${form.name}`,
+      `Phone: ${form.phone}`,
+      form.email.trim() ? `Email: ${form.email}` : '',
+      form.photos.length ? `Photos provided: ${form.photos.length}` : '',
+      `Please save this trade-in valuation request for the team.`,
+    ]
+      .filter(Boolean)
+      .join('\n');
+    openBlaze({ intent: 'trade_in', autoSend: true, prompt });
+  };
 
   const inputCls =
     'w-full bg-input border border-border rounded-md px-4 py-3 text-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent';
+  const errCls = 'mt-1 text-xs text-red-400';
 
   return (
     <>
@@ -84,40 +138,63 @@ function TradeInPage() {
               <div className="space-y-5 animate-fade-in">
                 <h2 className="text-xl font-bold mb-2">Vehicle Basics</h2>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <input className={inputCls} placeholder="Make (e.g. Toyota)" value={form.make} onChange={(e) => set('make', e.target.value)} />
-                  <input className={inputCls} placeholder="Model (e.g. Prado)" value={form.model} onChange={(e) => set('model', e.target.value)} />
-                  <select className={inputCls} value={form.year} onChange={(e) => set('year', e.target.value)}>
-                    <option value="">Year of manufacture</option>
-                    {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
-                  </select>
-                  <input className={inputCls} type="number" placeholder="Mileage (km)" value={form.mileage} onChange={(e) => set('mileage', e.target.value)} />
+                  <div>
+                    <input className={inputCls} placeholder="Make (e.g. Toyota)" value={form.make} onChange={(e) => set('make', e.target.value)} />
+                    {errors.make && <p className={errCls}>{errors.make}</p>}
+                  </div>
+                  <div>
+                    <input className={inputCls} placeholder="Model (e.g. Prado)" value={form.model} onChange={(e) => set('model', e.target.value)} />
+                    {errors.model && <p className={errCls}>{errors.model}</p>}
+                  </div>
+                  <div>
+                    <select className={inputCls} value={form.year} onChange={(e) => set('year', e.target.value)}>
+                      <option value="">Year of manufacture</option>
+                      {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+                    </select>
+                    {errors.year && <p className={errCls}>{errors.year}</p>}
+                  </div>
+                  <div>
+                    <input className={inputCls} type="number" placeholder="Mileage (km)" value={form.mileage} onChange={(e) => set('mileage', e.target.value)} />
+                    {errors.mileage && <p className={errCls}>{errors.mileage}</p>}
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* STEP 2 — Condition */}
+            {/* STEP 2 — Japanese Auction Grade */}
             {step === 1 && (
-              <div className="space-y-6 animate-fade-in">
-                <h2 className="text-xl font-bold mb-2">Mechanical & Body Condition</h2>
-                <p className="text-sm text-muted-foreground">Slide to rate the overall condition of your vehicle.</p>
-                <div className="pt-4">
-                  <input
-                    type="range" min={0} max={2} step={1}
-                    value={form.condition}
-                    onChange={(e) => set('condition', Number(e.target.value))}
-                    className="w-full accent-[color:var(--accent)] cursor-pointer"
-                    aria-label="Condition"
-                  />
-                  <div className="flex justify-between mt-3 text-xs uppercase tracking-wider">
-                    {CONDITIONS.map((c, i) => (
-                      <span key={c} className={form.condition === i ? 'text-accent font-semibold' : 'text-muted-foreground'}>{c}</span>
-                    ))}
-                  </div>
-                  <div className="mt-8 edge-card rounded-lg p-5 text-center">
-                    <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-1">Selected condition</p>
-                    <p className="text-3xl font-bold cyan-text">{CONDITIONS[form.condition]}</p>
-                  </div>
+              <div className="space-y-4 animate-fade-in">
+                <h2 className="text-xl font-bold">Japanese Auction Grade</h2>
+                <p className="text-sm text-muted-foreground">
+                  Select the grade that best matches your vehicle&apos;s condition.
+                </p>
+                <div className="grid sm:grid-cols-2 gap-2.5">
+                  {GRADES.map((g) => {
+                    const active = form.grade === g.code;
+                    return (
+                      <button
+                        key={g.code}
+                        type="button"
+                        onClick={() => set('grade', g.code)}
+                        className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition-all duration-300 ${
+                          active
+                            ? 'border-accent bg-accent/10 shadow-[0_0_18px_-6px_var(--glow)]'
+                            : 'border-border hover:border-accent/60 hover:bg-white/[0.03]'
+                        }`}
+                      >
+                        <span
+                          className={`shrink-0 min-w-[3.2rem] rounded-md border px-2 py-1 text-center text-xs font-bold ${
+                            active ? 'border-accent text-accent' : 'border-border text-foreground/80'
+                          }`}
+                        >
+                          {g.code}
+                        </span>
+                        <span className={`text-xs ${active ? 'text-accent' : 'text-muted-foreground'}`}>{g.desc}</span>
+                      </button>
+                    );
+                  })}
                 </div>
+                {errors.grade && <p className={errCls}>{errors.grade}</p>}
               </div>
             )}
 
@@ -125,10 +202,19 @@ function TradeInPage() {
             {step === 2 && (
               <div className="space-y-5 animate-fade-in">
                 <h2 className="text-xl font-bold mb-2">Your Details</h2>
-                <input className={inputCls} placeholder="Full name" value={form.name} onChange={(e) => set('name', e.target.value)} />
+                <div>
+                  <input className={inputCls} placeholder="Full name" value={form.name} onChange={(e) => set('name', e.target.value)} />
+                  {errors.name && <p className={errCls}>{errors.name}</p>}
+                </div>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <input className={inputCls} type="tel" placeholder="Phone" value={form.phone} onChange={(e) => set('phone', e.target.value)} />
-                  <input className={inputCls} type="email" placeholder="Email" value={form.email} onChange={(e) => set('email', e.target.value)} />
+                  <div>
+                    <input className={inputCls} type="tel" placeholder="Phone" value={form.phone} onChange={(e) => set('phone', e.target.value)} />
+                    {errors.phone && <p className={errCls}>{errors.phone}</p>}
+                  </div>
+                  <div>
+                    <input className={inputCls} type="email" placeholder="Email (optional)" value={form.email} onChange={(e) => set('email', e.target.value)} />
+                    {errors.email && <p className={errCls}>{errors.email}</p>}
+                  </div>
                 </div>
                 <label className="block cursor-pointer">
                   <div className="border border-dashed border-border rounded-lg p-8 text-center transition-colors hover:border-accent">
@@ -143,13 +229,13 @@ function TradeInPage() {
                     onChange={(e) => set('photos', Array.from(e.target.files ?? []).map((f) => f.name))}
                   />
                 </label>
-                <a
-                  href={waLink(summary)}
-                  target="_blank" rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={submit}
                   className="w-full inline-flex items-center justify-center gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-6 py-3.5 rounded-md transition-all"
                 >
-                  <MessageCircle className="w-4 h-4" /> Submit for Valuation
-                </a>
+                  <Flame className="w-4 h-4" /> Submit for Valuation
+                </button>
               </div>
             )}
 
