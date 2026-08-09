@@ -15,7 +15,7 @@ import {
 import { useVehicleBySlug, useVehicles } from '@/hooks/use-vehicles';
 import { formatKes, stockId } from '@/lib/inventory-data';
 import { PremiumVehicleCard } from '@/components/site/PremiumVehicleCard';
-import { VehicleSpecifications } from '@/components/site/VehicleSpecifications';
+import { VehicleSpecifications, type VehicleSpecSource } from '@/components/site/VehicleSpecifications';
 
 import { openBlaze } from '@/hooks/use-blaze-chat';
 
@@ -278,7 +278,7 @@ function VehicleDetailPage() {
         </section>
       )}
 
-      <VehicleSpecifications vehicle={v} />
+      <VehicleSpecifications vehicle={v as unknown as VehicleSpecSource} />
 
 
       {related.length > 0 && (
