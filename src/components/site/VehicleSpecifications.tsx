@@ -71,7 +71,9 @@ export function VehicleSpecifications({ vehicle }: { vehicle: VehicleSpecSource 
       value: pick(vehicle, 'interiorColor', 'interior_color', 'interior', 'interiorMaterial', 'interior_material'),
       icon: <Sofa className="h-4 w-4" />,
     },
-  ].filter((s): s is { label: string; value: string; icon: React.ReactNode } => Boolean(s.value));
+  ];
+  const specs = rawSpecs.flatMap((s) => (s.value ? [{ ...s, value: s.value }] : []));
+
 
   const features = Array.isArray(vehicle.features)
     ? vehicle.features.filter((f): f is string => typeof f === 'string' && f.trim().length > 0)
