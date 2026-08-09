@@ -265,32 +265,19 @@ function VehicleDetailPage() {
         </div>
       </section>
 
-      {(v.description || v.features.length > 0) && (
+      {v.description && (
         <section className="bg-background py-14">
-          <div className="container mx-auto grid gap-10 px-4 lg:grid-cols-2">
-            {v.description && (
-              <div>
-                <h2 className="section-title">Overview</h2>
-                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
-                  {v.description}
-                </p>
-              </div>
-            )}
-            {v.features.length > 0 && (
-              <div>
-                <h2 className="section-title">Features</h2>
-                <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-                  {v.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" /> {f}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          <div className="container mx-auto px-4">
+            <h2 className="section-title">Overview</h2>
+            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+              {v.description}
+            </p>
           </div>
         </section>
       )}
+
+      <VehicleSpecifications vehicle={v} />
+
 
       {related.length > 0 && (
         <section className="bg-card py-16">
