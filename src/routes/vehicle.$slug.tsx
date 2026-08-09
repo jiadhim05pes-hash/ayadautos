@@ -15,6 +15,8 @@ import {
 import { useVehicleBySlug, useVehicles } from '@/hooks/use-vehicles';
 import { formatKes, stockId } from '@/lib/inventory-data';
 import { PremiumVehicleCard } from '@/components/site/PremiumVehicleCard';
+import { VehicleSpecifications } from '@/components/site/VehicleSpecifications';
+
 import { openBlaze } from '@/hooks/use-blaze-chat';
 
 const RECENT_KEY = 'ayad.recentlyViewed';
