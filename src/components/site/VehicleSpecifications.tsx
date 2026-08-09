@@ -56,7 +56,7 @@ export function VehicleSpecifications({ vehicle }: { vehicle: VehicleSpecSource 
       ? `${vehicle.mileageKm.toLocaleString()} km`
       : null;
 
-  const specs: { label: string; value: string; icon: React.ReactNode }[] = [
+  const rawSpecs: { label: string; value: string | null; icon: React.ReactNode }[] = [
     { label: 'Engine', value: pick(vehicle, 'engine', 'engine_size'), icon: <Settings2 className="h-4 w-4" /> },
     { label: 'Transmission', value: pick(vehicle, 'transmission'), icon: <Cog className="h-4 w-4" /> },
     { label: 'Fuel', value: pick(vehicle, 'fuel', 'fuel_type'), icon: <Fuel className="h-4 w-4" /> },
