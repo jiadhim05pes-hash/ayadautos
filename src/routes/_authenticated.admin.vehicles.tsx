@@ -302,11 +302,32 @@ function VehicleDialog({
                 {STATUSES.map((x) => <option key={x}>{x}</option>)}
               </select>
             </Field>
+            <Field label="Engine"><Input value={f.engine} onChange={(e) => set('engine', e.target.value)} placeholder="2.8L 4-Cylinder Turbo Diesel" /></Field>
+            <Field label="Exterior color"><Input value={f.exterior_color} onChange={(e) => set('exterior_color', e.target.value)} placeholder="Pearl White" /></Field>
+            <Field label="Interior color"><Input value={f.interior_color} onChange={(e) => set('interior_color', e.target.value)} placeholder="Black / Beige" /></Field>
+            <Field label="Interior material">
+              <select className="w-full bg-input border border-border rounded-md px-3 py-2 text-sm" value={f.interior_material} onChange={(e) => set('interior_material', e.target.value)}>
+                <option value="">— none —</option>
+                {INTERIOR_MATERIALS.map((x) => <option key={x}>{x}</option>)}
+              </select>
+            </Field>
           </div>
+
+          <Field label="Key features (comma separated)">
+            <Textarea rows={2} value={f.features} onChange={(e) => set('features', e.target.value)} placeholder="Sunroof, Adaptive Cruise Control, 360 Camera, Heated Seats" />
+            {parseFeatures(f.features).length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {parseFeatures(f.features).map((t) => (
+                  <span key={t} className="text-xs px-2 py-0.5 rounded-full border border-accent/40 text-accent bg-accent/10">{t}</span>
+                ))}
+              </div>
+            )}
+          </Field>
 
           <Field label="Description">
             <Textarea rows={3} value={f.description} onChange={(e) => set('description', e.target.value)} />
           </Field>
+
 
           <Field label="Primary image">
             <div className="space-y-2">
