@@ -44,6 +44,10 @@ export interface VehicleDetail extends Vehicle {
   description: string | null;
   features: string[];
   images: string[];
+  engine: string | null;
+  exteriorColor: string | null;
+  interiorColor: string | null;
+  interiorMaterial: string | null;
 }
 
 async function fetchVehicleBySlug(slug: string): Promise<VehicleDetail | null> {
