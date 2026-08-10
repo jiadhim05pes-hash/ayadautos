@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, Cog, Fuel, Gauge, Palette, Settings2, Sofa } from 'lucide-react';
+import { Car, Check, Cog, Fuel, Gauge, Palette, Settings2, Sofa } from 'lucide-react';
 
 /**
  * Vehicle Specifications — scoped to the vehicle details page.
