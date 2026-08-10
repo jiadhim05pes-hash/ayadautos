@@ -70,6 +70,10 @@ async function fetchVehicleBySlug(slug: string): Promise<VehicleDetail | null> {
     description: row.description ?? null,
     features: Array.isArray(row.features) ? (row.features as string[]) : [],
     images: [base.image, ...gallery.filter((u) => u && u !== base.image)],
+    engine: row.engine ?? null,
+    exteriorColor: row.exterior_color ?? null,
+    interiorColor: row.interior_color ?? null,
+    interiorMaterial: row.interior_material ?? null,
   };
 }
 
