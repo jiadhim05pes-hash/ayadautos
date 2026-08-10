@@ -97,6 +97,11 @@ function AdminVehicles() {
       description: f.description || null,
       primary_image: f.primary_image || null,
       featured: f.featured, status: f.status,
+      engine: f.engine.trim() || null,
+      exterior_color: f.exterior_color.trim() || null,
+      interior_color: f.interior_color.trim() || null,
+      interior_material: f.interior_material || null,
+      features: parseFeatures(f.features),
       slug: f.slug || slugify(f.name + '-' + f.year),
     };
     const { error } = f.id
