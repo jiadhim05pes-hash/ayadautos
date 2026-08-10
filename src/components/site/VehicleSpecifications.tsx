@@ -56,19 +56,24 @@ export function VehicleSpecifications({ vehicle }: { vehicle: VehicleSpecSource 
       ? `${vehicle.mileageKm.toLocaleString()} km`
       : null;
 
+  const interiorColor = pick(vehicle, 'interiorColor', 'interior_color', 'interior');
+  const interiorMaterial = pick(vehicle, 'interiorMaterial', 'interior_material');
+  const interior = [interiorColor, interiorMaterial].filter(Boolean).join(' · ') || null;
+
   const rawSpecs: { label: string; value: string | null; icon: React.ReactNode }[] = [
     { label: 'Engine', value: pick(vehicle, 'engine', 'engine_size'), icon: <Settings2 className="h-4 w-4" /> },
     { label: 'Transmission', value: pick(vehicle, 'transmission'), icon: <Cog className="h-4 w-4" /> },
     { label: 'Fuel', value: pick(vehicle, 'fuel', 'fuel_type'), icon: <Fuel className="h-4 w-4" /> },
     { label: 'Mileage', value: mileage, icon: <Gauge className="h-4 w-4" /> },
+    { label: 'Body Style', value: pick(vehicle, 'category', 'body', 'body_style'), icon: <Car className="h-4 w-4" /> },
     {
-      label: 'Exterior',
+      label: 'Exterior Colour',
       value: pick(vehicle, 'exteriorColor', 'exterior_color', 'exterior', 'color'),
       icon: <Palette className="h-4 w-4" />,
     },
     {
       label: 'Interior',
-      value: pick(vehicle, 'interiorColor', 'interior_color', 'interior', 'interiorMaterial', 'interior_material'),
+      value: interior,
       icon: <Sofa className="h-4 w-4" />,
     },
   ];
