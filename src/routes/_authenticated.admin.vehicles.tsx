@@ -190,6 +190,10 @@ function AdminVehicles() {
                         mileage_km: v.mileage_km, registration: v.registration,
                         description: v.description ?? '', primary_image: v.primary_image ?? '',
                         featured: v.featured, status: v.status, slug: v.slug,
+                        engine: v.engine ?? '', exterior_color: v.exterior_color ?? '',
+                        interior_color: v.interior_color ?? '',
+                        interior_material: v.interior_material ?? '',
+                        features: Array.isArray(v.features) ? v.features.join(', ') : '',
                       })}
                       className="p-2 rounded hover:bg-white/10"
                       aria-label="Edit"
