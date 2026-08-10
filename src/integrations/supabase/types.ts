@@ -471,10 +471,14 @@ export type Database = {
           category_id: string | null
           created_at: string
           description: string | null
+          engine: string | null
+          exterior_color: string | null
           featured: boolean
           features: Json
           fuel: Database["public"]["Enums"]["fuel_type"]
           id: string
+          interior_color: string | null
+          interior_material: string | null
           make: string
           mileage_km: number
           model: string
@@ -493,10 +497,14 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
+          engine?: string | null
+          exterior_color?: string | null
           featured?: boolean
           features?: Json
           fuel: Database["public"]["Enums"]["fuel_type"]
           id?: string
+          interior_color?: string | null
+          interior_material?: string | null
           make: string
           mileage_km?: number
           model: string
@@ -515,10 +523,14 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string | null
+          engine?: string | null
+          exterior_color?: string | null
           featured?: boolean
           features?: Json
           fuel?: Database["public"]["Enums"]["fuel_type"]
           id?: string
+          interior_color?: string | null
+          interior_material?: string | null
           make?: string
           mileage_km?: number
           model?: string

@@ -6,8 +6,18 @@ import { PageHero } from '@/components/site/PageHero';
 import { PremiumVehicleCard } from '@/components/site/PremiumVehicleCard';
 import { InventorySearchBar } from '@/components/site/InventorySearchBar';
 
+export interface InventorySearch {
+  make?: string;
+  model?: string;
+  body?: string;
+  fuel?: string;
+  trans?: string;
+  min?: number;
+  max?: number;
+}
+
 export const Route = createFileRoute('/inventory')({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): InventorySearch => ({
     make: typeof s.make === 'string' ? s.make : undefined,
     model: typeof s.model === 'string' ? s.model : undefined,
     body: typeof s.body === 'string' ? (s.body as string) : undefined,

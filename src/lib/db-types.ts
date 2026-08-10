@@ -32,6 +32,10 @@ export interface VehicleRow {
   registration: Registration;
   description: string | null;
   features: string[];
+  engine: string | null;
+  exterior_color: string | null;
+  interior_color: string | null;
+  interior_material: string | null;
   primary_image: string | null;
   featured: boolean;
   status: VehicleStatus;
