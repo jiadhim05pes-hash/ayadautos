@@ -7,8 +7,13 @@ import { stockId } from '@/lib/inventory-data';
 import { useVehicles } from '@/hooks/use-vehicles';
 
 
+export interface FinancingSearch {
+  price?: number;
+  id?: string;
+}
+
 export const Route = createFileRoute('/financing')({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): FinancingSearch => ({
     price: typeof s.price === 'number' ? s.price : undefined,
     id: typeof s.id === 'string' ? s.id : undefined,
   }),
