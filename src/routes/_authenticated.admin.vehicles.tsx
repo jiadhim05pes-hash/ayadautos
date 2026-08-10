@@ -26,6 +26,8 @@ const FUELS: FuelType[] = ['Petrol', 'Diesel', 'Hybrid', 'Electric'];
 const TRANS: Transmission[] = ['Automatic', 'Manual'];
 const REGS: Registration[] = ['Fresh Import', 'New Registration', 'Locally Used'];
 
+const INTERIOR_MATERIALS = ['Leather', 'Premium Fabric', 'Alcantara', 'Cloth', 'Synthetic Leather'];
+
 type FormState = {
   id?: string;
   name: string; make: string; model: string; year: number;
@@ -34,6 +36,9 @@ type FormState = {
   mileage_km: number; registration: Registration;
   description: string; primary_image: string;
   featured: boolean; status: VehicleStatus; slug: string;
+  engine: string; exterior_color: string;
+  interior_color: string; interior_material: string;
+  features: string;
 };
 
 const empty: FormState = {
@@ -43,7 +48,14 @@ const empty: FormState = {
   mileage_km: 0, registration: 'Locally Used',
   description: '', primary_image: '',
   featured: false, status: 'available', slug: '',
+  engine: '', exterior_color: '',
+  interior_color: '', interior_material: '',
+  features: '',
 };
+
+function parseFeatures(s: string): string[] {
+  return s.split(',').map((x) => x.trim()).filter(Boolean);
+}
 
 function slugify(s: string) {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 80);
