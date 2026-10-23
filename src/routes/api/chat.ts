@@ -433,10 +433,13 @@ export const Route = createFileRoute('/api/chat')({
 
           // Final assistant reply — persist the exchange to server-side memory
           const reply = msg.content ?? '…';
-          void saveTranscript(sessionId, [
-            ...history,
-            { role: 'assistant', content: reply },
-          ]);
+          void saveTranscript(
+            sessionId,
+            [
+              ...history.filter((m) => m.role === 'user' || m.role === 'assistant'),
+              { role: 'assistant' as const, content: reply },
+            ].map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
+          );
           return new Response(
             JSON.stringify({ reply, sessionId }),
             { headers: { 'Content-Type': 'application/json' } },
