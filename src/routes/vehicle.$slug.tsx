@@ -49,7 +49,7 @@ export const Route = createFileRoute('/vehicle/$slug')({
   component: VehicleDetailPage,
   errorComponent: ({ error }) => (
     <div className="container mx-auto px-4 py-24 text-center" role="alert">
-      <p className="text-muted-foreground">{error.message}</p>
+      <p className="text-muted-foreground">{error instanceof Error ? error.message : 'Something went wrong.'}</p>
     </div>
   ),
   notFoundComponent: () => (
