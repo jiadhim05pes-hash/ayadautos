@@ -16,7 +16,7 @@ Dealership: ${dealership.brand.name} · ${dealership.contact.locationDisplay}
 Hours: ${dealership.contact.hours}
 Phone/WhatsApp: ${dealership.contact.phoneDisplay}
 
-You MUST respond in the same language the user writes in (English, Kiswahili, or Sheng).
+Language: default to natural English. Reply in Kiswahili, Sheng or any other language ONLY when the customer writes in it — mirror their tone and energy naturally, while never dropping your concierge role or task.
 
 Behavior — you are an AI VEHICLE SALES ASSISTANT, not a contact form:
 - When a message arrives with vehicle context (name, stock ID, price, specs), acknowledge it briefly and ANSWER the customer's actual question first using the inventory and dealership knowledge below (availability, price, mileage, fuel, transmission, features, condition, financing, trade-in, delivery).
@@ -156,6 +156,45 @@ async function fetchInventorySummary(): Promise<{ text: string; ids: Set<string>
   } catch (e) {
     console.error('[chat] inventory fetch failed', e);
     return { text: '(inventory temporarily unavailable)', ids: new Set() };
+  }
+}
+
+// ============ Server-side conversation memory (per browser session) ============
+type StoredMessage = { role: 'user' | 'assistant'; content: string };
+
+async function loadTranscript(sessionId: string): Promise<StoredMessage[]> {
+  try {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const client = supabaseAdmin as unknown as { from: (t: string) => any };
+    const { data } = await client
+      .from('chat_sessions')
+      .select('messages')
+      .eq('session_id', sessionId)
+      .maybeSingle();
+    const msgs = data?.messages as StoredMessage[] | undefined;
+    return Array.isArray(msgs)
+      ? msgs.filter((m) => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim())
+      : [];
+  } catch (e) {
+    console.error('[chat] memory load failed', e);
+    return [];
+  }
+}
+
+async function saveTranscript(sessionId: string, transcript: StoredMessage[]) {
+  try {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const client = supabaseAdmin as unknown as { from: (t: string) => any };
+    const trimmed = transcript.slice(-60);
+    const { error } = await client
+      .from('chat_sessions')
+      .upsert(
+        { session_id: sessionId, messages: trimmed, updated_at: new Date().toISOString() },
+        { onConflict: 'session_id' },
+      );
+    if (error) throw error;
+  } catch (e) {
+    console.error('[chat] memory save failed', e);
   }
 }
 
@@ -303,22 +342,30 @@ export const Route = createFileRoute('/api/chat')({
         const key = process.env.LOVABLE_API_KEY;
         if (!key) return new Response(JSON.stringify({ error: 'AI not configured' }), { status: 500 });
 
-        let body: { sessionId?: string; messages?: ChatMessage[] };
+        let body: { sessionId?: string; message?: string; messages?: ChatMessage[] };
         try {
           body = await request.json();
         } catch {
           return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
         }
         const sessionId = body.sessionId?.trim();
-        const userMessages = Array.isArray(body.messages) ? body.messages : [];
-        if (!sessionId || userMessages.length === 0) {
-          return new Response(JSON.stringify({ error: 'Missing sessionId or messages' }), { status: 400 });
+        const clientMessages = Array.isArray(body.messages) ? body.messages : [];
+        const userText =
+          typeof body.message === 'string' && body.message.trim()
+            ? body.message.trim()
+            : [...clientMessages].reverse().find((m) => m.role === 'user' && typeof m.content === 'string')?.content;
+        if (!sessionId || !userText) {
+          return new Response(JSON.stringify({ error: 'Missing sessionId or message' }), { status: 400 });
         }
+
+        // Blaze remembers the conversation on the backend across refreshes.
+        const transcript = await loadTranscript(sessionId);
+        const history: ChatMessage[] = [...transcript, { role: 'user', content: userText }];
 
         const { text: invText, ids: invIds } = await fetchInventorySummary();
         const messages: ChatMessage[] = [
           { role: 'system', content: buildSystemPrompt(invText) },
-          ...userMessages.filter((m) => m && typeof m.content === 'string'),
+          ...history.slice(-24),
         ];
 
         // Up to 3 tool-call rounds
@@ -360,7 +407,7 @@ export const Route = createFileRoute('/api/chat')({
                 const args = JSON.parse(call.function.arguments || '{}');
                 switch (call.function.name) {
                   case 'save_lead':
-                    result = await saveLead(sessionId, args, userMessages, invIds);
+                    result = await saveLead(sessionId, args, history, invIds);
                     break;
                   case 'book_test_drive':
                     result = await bookTestDrive(args, invIds);
@@ -384,9 +431,14 @@ export const Route = createFileRoute('/api/chat')({
             continue; // loop to let model produce a final assistant message
           }
 
-          // Final assistant reply
+          // Final assistant reply — persist the exchange to server-side memory
+          const reply = msg.content ?? '…';
+          void saveTranscript(sessionId, [
+            ...history,
+            { role: 'assistant', content: reply },
+          ]);
           return new Response(
-            JSON.stringify({ reply: msg.content ?? '', sessionId }),
+            JSON.stringify({ reply, sessionId }),
             { headers: { 'Content-Type': 'application/json' } },
           );
         }

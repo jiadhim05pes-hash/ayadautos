@@ -7,10 +7,9 @@ import { onBlazeOpen } from '@/hooks/use-blaze-chat';
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
 const SESSION_KEY = 'ayad-blaze-session';
-const HISTORY_KEY = 'ayad-blaze-history';
 
 const GREETING =
-  "Karibu Ayad Automotives! I'm Blaze, your AI concierge — ask me about our imports, financing, trade-ins or booking a test drive. English, Kiswahili au Sheng — yote sawa.";
+  "Karibu Ayad Automotives! I'm Blaze, your AI concierge — ask me about our imports, financing, trade-ins or booking a test drive.";
 
 function getSessionId() {
   if (typeof window === 'undefined') return '';
@@ -36,10 +35,12 @@ export function AiChatWidget() {
   useEffect(() => {
     setMounted(true);
     setSessionId(getSessionId());
+    // Blaze keeps memory on the backend (per browser session), but every
+    // refresh starts a visually clean chat — no restored local history.
     try {
-      const raw = window.localStorage.getItem(HISTORY_KEY);
-      if (raw) setMessages(JSON.parse(raw));
+      window.localStorage.removeItem('ayad-blaze-history');
     } catch {}
+    setMessages([]);
   }, []);
 
   // Listen for global "open Blaze" events (from CTAs across the site).
@@ -55,9 +56,6 @@ export function AiChatWidget() {
 
   useEffect(() => {
     if (!mounted) return;
-    try {
-      window.localStorage.setItem(HISTORY_KEY, JSON.stringify(messages.slice(-30)));
-    } catch {}
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, mounted]);
 
@@ -74,15 +72,14 @@ export function AiChatWidget() {
   async function send(override?: string) {
     const text = (override ?? input).trim();
     if (!text || loading) return;
-    const next: ChatMessage[] = [...messages, { role: 'user', content: text }];
-    setMessages(next);
+    setMessages((m) => [...m, { role: 'user', content: text }]);
     setInput('');
     setLoading(true);
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, messages: next }),
+        body: JSON.stringify({ sessionId, message: text }),
       });
       const data = await res.json();
       if (!res.ok) {

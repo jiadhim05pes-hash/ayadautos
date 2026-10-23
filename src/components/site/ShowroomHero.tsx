@@ -69,16 +69,14 @@ function ensurePreload(onProgress: (loaded: number, done: boolean) => void) {
   };
 }
 
-const STORY = [
-  { at: [0, 0.5] as const, title: 'CURATED LUXURY', sub: 'Executive imports for the discerning few.' },
-  { at: [0.5, 1] as const, title: 'YOUR NEXT RIDE AWAITS', sub: 'Step into the AYAD showroom.' },
-];
+const STORY = [{ at: [0.45, 1] as const, title: 'YOUR NEXT RIDE AWAITS', sub: 'Step into the AYAD showroom.' }];
 
 export function ShowroomHero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scrollHintRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const taglineRef = useRef<HTMLParagraphElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const storyRefs = useRef<Array<HTMLDivElement | null>>([]);
 
@@ -148,7 +146,7 @@ export function ShowroomHero() {
         if (!el) return;
         const [a, b] = s.at;
         const span = b - a;
-        const fadeIn = i === 0 ? 1 : ramp(p, a, a + span * 0.35);
+        const fadeIn = ramp(p, a, a + span * 0.35);
         const fadeOut = 1 - ramp(p, b - span * 0.35, b);
         const active = i === STORY.length - 1 ? fadeIn : fadeIn * fadeOut;
         el.style.opacity = String(active);
@@ -186,6 +184,12 @@ export function ShowroomHero() {
           if (ctaRef.current) {
             const appear = ramp(p, 0, 0.15);
             ctaRef.current.style.opacity = String(appear * (1 - ramp(p, 0.6, 0.8)));
+          }
+          if (taglineRef.current) {
+            // Appears in sync with the CTAs, then fades out as the next story beat arrives.
+            const tag = ramp(p, 0, 0.15) * (1 - ramp(p, 0.42, 0.58));
+            taglineRef.current.style.opacity = String(tag);
+            taglineRef.current.style.transform = `translateY(${(1 - tag) * 14}px)`;
           }
           if (searchRef.current) {
             // Search toolbar reveals once the hero animation is essentially done.
@@ -257,22 +261,31 @@ export function ShowroomHero() {
 
             <div
               ref={ctaRef}
-              className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 pointer-events-auto will-change-[opacity]"
+              className="mt-8 flex flex-col items-center justify-center gap-4 pointer-events-auto will-change-[opacity]"
             >
-              <Link
-                to="/inventory"
-                className="group inline-flex items-center gap-3 px-8 py-3.5 text-xs uppercase tracking-[0.28em] font-semibold rounded-md transition-all hover:shadow-[0_0_28px_-4px_rgba(226,232,240,0.6)]"
-                style={{ backgroundColor: 'var(--platinum)', color: 'var(--background)' }}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <Link
+                  to="/inventory"
+                  className="group inline-flex items-center gap-3 px-8 py-3.5 text-xs uppercase tracking-[0.28em] font-semibold rounded-md transition-all hover:shadow-[0_0_28px_-4px_rgba(226,232,240,0.6)]"
+                  style={{ backgroundColor: 'var(--platinum)', color: 'var(--background)' }}
+                >
+                  Explore Inventory
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+                <Link
+                  to="/trade-in"
+                  className="neon-outline inline-flex items-center gap-3 bg-transparent px-8 py-3.5 text-xs uppercase tracking-[0.28em] font-semibold rounded-md text-foreground"
+                >
+                  Value Your Trade-In
+                </Link>
+              </div>
+              <p
+                ref={taglineRef}
+                style={{ opacity: 0 }}
+                className="text-xs sm:text-sm uppercase tracking-[0.3em] font-medium text-foreground/90 text-center will-change-[opacity,transform]"
               >
-                Explore Inventory
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </Link>
-              <Link
-                to="/trade-in"
-                className="neon-outline inline-flex items-center gap-3 bg-transparent px-8 py-3.5 text-xs uppercase tracking-[0.28em] font-semibold rounded-md text-foreground"
-              >
-                Value Your Trade-In
-              </Link>
+                Executive imports for the discerning few.
+              </p>
             </div>
           </div>
 
