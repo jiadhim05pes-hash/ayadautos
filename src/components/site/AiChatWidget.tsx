@@ -9,7 +9,7 @@ type ChatMessage = { role: 'user' | 'assistant'; content: string };
 const SESSION_KEY = 'ayad-blaze-session';
 
 const GREETING =
-  "Karibu Ayad Automotives! I'm Blaze, your AI concierge — ask me about our imports, financing, trade-ins or booking a test drive.";
+  "Karibu Ayad Automotives! I'm Blaze — ask me about our imports, financing, trade-ins or booking a test drive.";
 
 function getSessionId() {
   if (typeof window === 'undefined') return '';
@@ -108,7 +108,7 @@ export function AiChatWidget() {
           aria-label="Open Blaze AI concierge"
           className="fixed bottom-5 right-5 z-50 group"
         >
-          <span className="absolute inset-0 rounded-full bg-accent/60 opacity-60 animate-ping" />
+          <span className="absolute inset-0 rounded-full bg-accent/50 opacity-50 blaze-ping" />
           <span className="relative flex items-center gap-2 pl-3 pr-4 py-3 rounded-full bg-gradient-to-br from-accent to-accent/70 text-accent-foreground shadow-xl shadow-accent/30 hover:scale-105 transition-transform">
             <Flame className="w-5 h-5" />
             <span className="text-sm font-semibold hidden sm:inline">Chat with Blaze</span>
