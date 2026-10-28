@@ -69,7 +69,10 @@ function ensurePreload(onProgress: (loaded: number, done: boolean) => void) {
   };
 }
 
-const STORY = [{ at: [0.45, 1] as const, title: 'YOUR NEXT RIDE AWAITS', sub: 'Step into the AYAD showroom.' }];
+const STORY = [
+  { at: [0, 0.45] as const, title: '', sub: '' },
+  { at: [0.45, 1] as const, title: 'YOUR NEXT RIDE AWAITS', sub: 'Step into the AYAD showroom.' },
+];
 
 export function ShowroomHero() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -146,7 +149,7 @@ export function ShowroomHero() {
         if (!el) return;
         const [a, b] = s.at;
         const span = b - a;
-        const fadeIn = ramp(p, a, a + span * 0.35);
+        const fadeIn = i === 0 ? 1 : ramp(p, a, a + span * 0.35);
         const fadeOut = 1 - ramp(p, b - span * 0.35, b);
         const active = i === STORY.length - 1 ? fadeIn : fadeIn * fadeOut;
         el.style.opacity = String(active);
