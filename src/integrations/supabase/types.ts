@@ -112,6 +112,24 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_sessions: {
+        Row: {
+          messages: Json
+          session_id: string
+          updated_at: string
+        }
+        Insert: {
+          messages?: Json
+          session_id: string
+          updated_at?: string
+        }
+        Update: {
+          messages?: Json
+          session_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string
