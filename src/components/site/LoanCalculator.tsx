@@ -43,8 +43,6 @@ function computeLoan(price: number, down: number, months: number, annualRatePct:
   return { monthly, totalInterest, totalCost, principal, months };
 }
 
-/** Thousands-separated display for numeric inputs (e.g. 2,350,000). */
-const group = (n: number) => (isFinite(n) ? n : 0).toLocaleString('en-US');
 const parseNum = (s: string) => Number(s.replace(/[^\d]/g, '')) || 0;
 
 export interface CalculatorVehicle {
