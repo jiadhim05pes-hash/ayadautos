@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowRight } from 'lucide-react';
 import { InventorySearchBar } from './InventorySearchBar';
@@ -97,8 +97,9 @@ export function ShowroomHero() {
     });
   }, []);
 
-  // 2. CANVAS + GSAP
-  useEffect(() => {
+  // 2. CANVAS + GSAP (useLayoutEffect: initial states apply before first paint,
+  // so no text layer ever flashes visible on load or route return)
+  useLayoutEffect(() => {
     if (!ready) return;
     const canvas = canvasRef.current;
     const container = containerRef.current;
@@ -156,6 +157,24 @@ export function ShowroomHero() {
         el.style.transform = `translateY(${(1 - active) * 20}px)`;
       });
     };
+
+    // Apply safe initial states synchronously (before the async GSAP import)
+    // so nothing flashes visible during the plugin load or on route return.
+    const applyInitialState = () => {
+      updateStory(0);
+      if (scrollHintRef.current) scrollHintRef.current.style.opacity = '1';
+      if (ctaRef.current) ctaRef.current.style.opacity = '0';
+      if (taglineRef.current) {
+        taglineRef.current.style.opacity = '0';
+        taglineRef.current.style.transform = 'translateY(14px)';
+      }
+      if (searchRef.current) {
+        searchRef.current.style.opacity = '0';
+        searchRef.current.style.transform = 'translateY(24px)';
+        searchRef.current.style.pointerEvents = 'none';
+      }
+    };
+    applyInitialState();
 
     let st: { kill: () => void } | undefined;
     let disposed = false;
@@ -247,6 +266,7 @@ export function ShowroomHero() {
                 <div
                   key={s.title}
                   ref={(el) => { storyRefs.current[i] = el; }}
+                  style={{ opacity: 0 }}
                   className="absolute inset-0 flex flex-col items-center justify-center will-change-[opacity,transform]"
                 >
                   <p className="text-[0.6rem] sm:text-xs uppercase tracking-[0.5em] text-accent mb-3">
@@ -264,6 +284,7 @@ export function ShowroomHero() {
 
             <div
               ref={ctaRef}
+              style={{ opacity: 0 }}
               className="mt-8 flex flex-col items-center justify-center gap-4 pointer-events-auto will-change-[opacity]"
             >
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
