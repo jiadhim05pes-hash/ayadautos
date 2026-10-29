@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Flame } from 'lucide-react';
 import { openBlaze } from '@/hooks/use-blaze-chat';
@@ -6,22 +6,40 @@ import { openBlaze } from '@/hooks/use-blaze-chat';
 /**
  * Multi-currency loan payment calculator.
  *
- * Architecture notes:
+ * Architecture:
+ * - Base currency anchor: every internal value (price, down payment, loan
+ *   results) is stored and computed in KES. Currency is a presentation layer.
+ * - Live FX: rates are fetched once on mount from open.er-api.com (KES base).
+ *   If the request fails or is slow, hardcoded fallback rates are used so the
+ *   calculator always works offline.
+ * - Editing in a foreign currency: the typed amount is divided back to the
+ *   KES base, so switching currency instantly re-converts every field.
  * - Pure client computation today. Built so a future server fn can replace
  *   `computeLoan()` with a call into a bank/SACCO rate API without touching
  *   the UI (props/return shape is stable).
- * - Currency is purely a display concern — math is unit-agnostic.
  */
 
 const CURRENCIES = [
-  { code: 'KES', symbol: 'KSh', locale: 'en-KE', label: 'Kenyan Shilling' },
-  { code: 'USD', symbol: '$', locale: 'en-US', label: 'US Dollar' },
-  { code: 'EUR', symbol: '€', locale: 'en-IE', label: 'Euro' },
-  { code: 'GBP', symbol: '£', locale: 'en-GB', label: 'British Pound' },
-  { code: 'AED', symbol: 'AED', locale: 'en-AE', label: 'UAE Dirham' },
+  { code: 'KES', locale: 'en-KE', label: 'Kenyan Shilling' },
+  { code: 'USD', locale: 'en-US', label: 'US Dollar' },
+  { code: 'EUR', locale: 'en-IE', label: 'Euro' },
+  { code: 'GBP', locale: 'en-GB', label: 'British Pound' },
+  { code: 'AED', locale: 'en-AE', label: 'UAE Dirham' },
 ] as const;
 
 type Currency = (typeof CURRENCIES)[number]['code'];
+
+/** KES → currency fallbacks (approximate market rates) used when live FX is unavailable. */
+const FALLBACK_RATES: Record<Currency, number> = {
+  KES: 1,
+  USD: 0.0078,
+  EUR: 0.0067,
+  GBP: 0.0058,
+  AED: 0.0287,
+};
+
+/** Live KES-based rates; null until the fetch resolves (fallbacks used meanwhile). */
+type LiveRates = Partial<Record<Currency, number>> & { fetchedAt?: string };
 
 interface LoanResult {
   monthly: number;
@@ -43,7 +61,7 @@ function computeLoan(price: number, down: number, months: number, annualRatePct:
   return { monthly, totalInterest, totalCost, principal, months };
 }
 
-const parseNum = (s: string) => Number(s.replace(/[^\d]/g, '')) || 0;
+const parseNum = (s: string) => Number(s.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')) || 0;
 
 export interface CalculatorVehicle {
   id?: string;
@@ -58,17 +76,66 @@ export function LoanCalculator({
 }: { initialPrice?: number; vehicle?: CalculatorVehicle } = {}) {
   const [currency, setCurrency] = useState<Currency>('KES');
   const basePrice = initialPrice ?? vehicle?.priceKes ?? 3_500_000;
-  const [price, setPrice] = useState(basePrice);
-  const [down, setDown] = useState(Math.round(basePrice * 0.2));
+  // All monetary state is anchored in KES (the base currency).
+  const [priceBase, setPriceBase] = useState(basePrice);
+  const [downBase, setDownBase] = useState(Math.round(basePrice * 0.2));
   const [months, setMonths] = useState(48);
   const [rate, setRate] = useState(14);
+  const [liveRates, setLiveRates] = useState<LiveRates | null>(null);
+  const [ratesSource, setRatesSource] = useState<'live' | 'offline' | null>(null);
 
-  const result = useMemo(() => computeLoan(price, down, months, rate), [price, down, months, rate]);
+  // Fetch live exchange rates once on mount (KES base), with graceful fallback.
+  useEffect(() => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+    fetch('https://open.er-api.com/v6/latest/KES', { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(String(res.status)))))
+      .then((json) => {
+        if (json?.result !== 'success' || typeof json?.rates !== 'object') {
+          throw new Error('unexpected rates payload');
+        }
+        const rates: LiveRates = { fetchedAt: json.time_last_update_utc as string | undefined };
+        for (const c of CURRENCIES) {
+          const v = Number(json.rates[c.code]);
+          if (Number.isFinite(v) && v > 0) rates[c.code] = v;
+        }
+        if (!rates.USD) throw new Error('no usable rates');
+        setLiveRates(rates);
+        setRatesSource('live');
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setRatesSource('offline');
+      })
+      .finally(() => clearTimeout(timer));
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, []);
 
-  const cfg = CURRENCIES.find(c => c.code === currency)!;
-  const fmt = (n: number) =>
+  // KES → selected currency conversion rate (live, else hardcoded fallback).
+  const fx = useMemo(() => {
+    const rateFor = (code: Currency): number => {
+      if (code === 'KES') return 1;
+      const live = liveRates?.[code];
+      return Number.isFinite(live) && live! > 0 ? live! : FALLBACK_RATES[code];
+    };
+    return {
+      rateFor,
+      toDisplay: (kes: number) => kes * rateFor(currency),
+      toBase: (displayed: number) => displayed / rateFor(currency),
+    };
+  }, [currency, liveRates]);
+
+  const result = useMemo(
+    () => computeLoan(priceBase, downBase, months, rate),
+    [priceBase, downBase, months, rate],
+  );
+
+  const cfg = CURRENCIES.find((c) => c.code === currency)!;
+  const fmt = (kes: number) =>
     new Intl.NumberFormat(cfg.locale, { style: 'currency', currency: cfg.code, maximumFractionDigits: 0 }).format(
-      isFinite(n) ? n : 0,
+      isFinite(kes) ? Math.max(0, fx.toDisplay(kes)) : 0,
     );
 
   const requestQuote = () => {
@@ -76,8 +143,8 @@ export function LoanCalculator({
       `I'd like to request a finance quote.`,
       vehicle ? `Vehicle: ${vehicle.name}` : null,
       vehicle?.stock ? `Stock ID: ${vehicle.stock}` : null,
-      `Vehicle price: ${fmt(price)}`,
-      `Deposit: ${fmt(down)}`,
+      `Vehicle price: ${fmt(priceBase)}${currency !== 'KES' ? ` (≈ KES ${Math.round(priceBase).toLocaleString()})` : ''}`,
+      `Deposit: ${fmt(downBase)}`,
       `Loan period: ${months} months`,
       `Indicative rate: ${rate}% APR`,
       `Estimated monthly repayment: ${fmt(result.monthly)}`,
@@ -100,26 +167,40 @@ export function LoanCalculator({
           )}
 
           <Field label="Currency">
-            <select
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as Currency)}
-              className="w-full bg-input border border-border rounded-md px-3 py-2 text-foreground"
-            >
-              {CURRENCIES.map(c => (
-                <option key={c.code} value={c.code}>{c.code} — {c.label}</option>
-              ))}
-            </select>
+            <div className="flex items-center gap-3">
+              <select
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
+                className="w-full bg-input border border-border rounded-md px-3 py-2 text-foreground"
+              >
+                {CURRENCIES.map((c) => (
+                  <option key={c.code} value={c.code}>{c.code} — {c.label}</option>
+                ))}
+              </select>
+              {ratesSource && (
+                <span
+                  className="shrink-0 text-[10px] uppercase tracking-widest text-muted-foreground"
+                  title={
+                    ratesSource === 'live'
+                      ? `Live exchange rates${liveRates?.fetchedAt ? ` · updated ${liveRates.fetchedAt}` : ''}`
+                      : 'Network unavailable — using built-in indicative rates'
+                  }
+                >
+                  {ratesSource === 'live' ? 'Live rates' : 'Offline rates'}
+                </span>
+              )}
+            </div>
           </Field>
 
           <Field label={`Vehicle Price (${cfg.code})`}>
             <input
               type="text"
-              inputMode="numeric"
-              value={fmt(price)}
+              inputMode="decimal"
+              value={fmt(priceBase)}
               onChange={(e) => {
-                const v = parseNum(e.target.value);
-                setPrice(v);
-                if (down > v) setDown(v);
+                const base = Math.round(fx.toBase(parseNum(e.target.value)));
+                setPriceBase(base);
+                if (downBase > base) setDownBase(base);
               }}
               className="w-full bg-input border border-border rounded-md px-3 py-2 text-foreground"
             />
@@ -128,18 +209,18 @@ export function LoanCalculator({
           <Field label={`Down Payment (${cfg.code})`}>
             <input
               type="text"
-              inputMode="numeric"
-              value={fmt(down)}
-              onChange={(e) => setDown(Math.min(price, parseNum(e.target.value)))}
+              inputMode="decimal"
+              value={fmt(downBase)}
+              onChange={(e) => setDownBase(Math.min(priceBase, Math.round(fx.toBase(parseNum(e.target.value)))))}
               className="w-full bg-input border border-border rounded-md px-3 py-2 text-foreground"
             />
             <input
               type="range"
               min={0}
-              max={price}
-              step={Math.max(1, Math.round(price / 100))}
-              value={down}
-              onChange={(e) => setDown(+e.target.value)}
+              max={priceBase}
+              step={Math.max(1, Math.round(priceBase / 100))}
+              value={downBase}
+              onChange={(e) => setDownBase(+e.target.value)}
               className="w-full mt-2 accent-[color:var(--accent)]"
             />
           </Field>
@@ -182,7 +263,8 @@ export function LoanCalculator({
             <Flame className="w-4 h-4" /> Request a Finance Quote
           </button>
           <p className="text-xs text-muted-foreground pt-1">
-            Indicative only. Final terms depend on the lender (bank or SACCO), your credit profile, and current market rates.
+            Indicative only. Converted at current market rates; final terms depend on the lender (bank or SACCO), your
+            credit profile, and current market rates.
           </p>
         </div>
       </div>
