@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from '@tanstack/react-router';
 import { ArrowRight } from 'lucide-react';
 import { InventorySearchBar } from './InventorySearchBar';
@@ -97,8 +97,9 @@ export function ShowroomHero() {
     });
   }, []);
 
-  // 2. CANVAS + GSAP
-  useEffect(() => {
+  // 2. CANVAS + GSAP (useLayoutEffect: initial states apply before first paint,
+  // so no text layer ever flashes visible on load or route return)
+  useLayoutEffect(() => {
     if (!ready) return;
     const canvas = canvasRef.current;
     const container = containerRef.current;
