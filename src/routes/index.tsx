@@ -162,49 +162,51 @@ function Home() {
         </div>
       </section>
 
-      {/* Testimonials teaser */}
-      <section className="py-20 bg-card">
-        <div className="container mx-auto px-4">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <h2 className="section-title">What Clients Say</h2>
+      <div className="bg-background -mb-16">
+        {/* Testimonials teaser */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="text-center max-w-2xl mx-auto mb-10">
+              <h2 className="section-title">What Clients Say</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              {[
+                { name: 'James Mwangi', role: 'Business Owner', text: 'Excellent service and quality vehicles. The team handled everything from selection to financing \u2014 I drove off in two weeks.' },
+                { name: 'Sarah Kipchoge', role: 'Executive', text: 'Best dealership experience in Nairobi. Professional, transparent paperwork, and a beautiful Lexus RX delivered as promised.' },
+                { name: 'David Okonkwo', role: 'Entrepreneur', text: 'Great financing options and support throughout the process. They walked me through the SACCO option which saved me thousands.' },
+              ].map((t) => (
+                <Card key={t.name} className="group edge-card rounded-2xl p-6 shadow-xl">
+                  <div className="flex gap-1 mb-3" aria-label="5 out of 5 stars">
+                    {Array.from({ length: 5 }).map((_, k) => (
+                      <Star key={k} className="w-4 h-4 fill-[color:var(--accent)] text-[color:var(--accent)]" />
+                    ))}
+                  </div>
+                  <p className="text-muted-foreground italic mb-4 text-sm leading-relaxed">"{t.text}"</p>
+                  <p className="font-semibold text-sm">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.role}</p>
+                </Card>
+              ))}
+            </div>
+            <div className="text-center mt-8">
+              <Link to="/testimonials" className="inline-flex items-center gap-2 text-accent font-semibold hover:gap-3 transition-all">
+                Read more testimonials <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {[
-              { name: 'James Mwangi', role: 'Business Owner', text: 'Excellent service and quality vehicles. The team handled everything from selection to financing \u2014 I drove off in two weeks.' },
-              { name: 'Sarah Kipchoge', role: 'Executive', text: 'Best dealership experience in Nairobi. Professional, transparent paperwork, and a beautiful Lexus RX delivered as promised.' },
-              { name: 'David Okonkwo', role: 'Entrepreneur', text: 'Great financing options and support throughout the process. They walked me through the SACCO option which saved me thousands.' },
-            ].map((t) => (
-              <Card key={t.name} className="bg-card border border-border/50 rounded-xl p-6 shadow-sm hover:border-primary/50 transition-all">
-                <div className="flex gap-1 mb-3" aria-label="5 out of 5 stars">
-                  {Array.from({ length: 5 }).map((_, k) => (
-                    <Star key={k} className="w-4 h-4 fill-[color:var(--accent)] text-[color:var(--accent)]" />
-                  ))}
-                </div>
-                <p className="text-muted-foreground italic mb-4 text-sm leading-relaxed">"{t.text}"</p>
-                <p className="font-semibold text-sm">{t.name}</p>
-                <p className="text-xs text-muted-foreground">{t.role}</p>
-              </Card>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link to="/testimonials" className="inline-flex items-center gap-2 text-accent font-semibold hover:gap-3 transition-all">
-              Read more testimonials <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      {/* CTA strip */}
-      <section className="pt-16 pb-12 mb-0 bg-gradient-to-r from-accent/20 via-card to-accent/20 border-y border-border">
-        <div className="container mx-auto px-4 text-center max-w-2xl">
-          <h2 className="display-font text-3xl md:text-4xl font-bold mb-3">Ready to find your next vehicle?</h2>
-          <p className="text-muted-foreground mb-6">Visit our Ngong Road showroom or talk to us on WhatsApp today.</p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link to="/contact" className="bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 rounded-md font-semibold">Contact Us</Link>
-            <Link to="/financing" className="border border-border hover:border-accent text-foreground px-6 py-3 rounded-md font-semibold">Get a Financing Quote</Link>
+        {/* CTA strip */}
+        <section className="pt-16 pb-0 mb-0 bg-background">
+          <div className="container mx-auto px-4 text-center max-w-2xl">
+            <h2 className="display-font text-3xl md:text-4xl font-bold mb-3">Ready to find your next vehicle?</h2>
+            <p className="text-muted-foreground mb-6">Visit our Ngong Road showroom or talk to us on WhatsApp today.</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link to="/contact" className="bg-accent hover:bg-accent/90 text-accent-foreground px-6 py-3 rounded-md font-semibold">Contact Us</Link>
+              <Link to="/financing" className="border border-border hover:border-accent text-foreground px-6 py-3 rounded-md font-semibold">Get a Financing Quote</Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 }
