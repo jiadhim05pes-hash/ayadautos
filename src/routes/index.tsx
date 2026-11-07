@@ -168,13 +168,13 @@ function Home() {
           <div className="text-center max-w-2xl mx-auto mb-10">
             <h2 className="section-title">What Clients Say</h2>
           </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
               { name: 'James Mwangi', role: 'Business Owner', text: 'Excellent service and quality vehicles. The team handled everything from selection to financing \u2014 I drove off in two weeks.' },
               { name: 'Sarah Kipchoge', role: 'Executive', text: 'Best dealership experience in Nairobi. Professional, transparent paperwork, and a beautiful Lexus RX delivered as promised.' },
               { name: 'David Okonkwo', role: 'Entrepreneur', text: 'Great financing options and support throughout the process. They walked me through the SACCO option which saved me thousands.' },
             ].map((t) => (
-              <Card key={t.name} className="glass p-6">
+              <Card key={t.name} className="bg-card border border-border/50 rounded-xl p-6 shadow-sm hover:border-primary/50 transition-all">
                 <div className="flex gap-1 mb-3" aria-label="5 out of 5 stars">
                   {Array.from({ length: 5 }).map((_, k) => (
                     <Star key={k} className="w-4 h-4 fill-[color:var(--accent)] text-[color:var(--accent)]" />
@@ -195,7 +195,7 @@ function Home() {
       </section>
 
       {/* CTA strip */}
-      <section className="py-16 bg-gradient-to-r from-accent/20 via-card to-accent/20 border-y border-border">
+      <section className="pt-16 pb-12 mb-0 bg-gradient-to-r from-accent/20 via-card to-accent/20 border-y border-border">
         <div className="container mx-auto px-4 text-center max-w-2xl">
           <h2 className="display-font text-3xl md:text-4xl font-bold mb-3">Ready to find your next vehicle?</h2>
           <p className="text-muted-foreground mb-6">Visit our Ngong Road showroom or talk to us on WhatsApp today.</p>
