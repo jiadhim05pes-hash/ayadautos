@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Blaze chat sessions use server-issued UUIDs and an initialized empty database row; chat requests must match an existing row to prevent stale transcript reuse.

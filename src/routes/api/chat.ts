@@ -162,22 +162,24 @@ async function fetchInventorySummary(): Promise<{ text: string; ids: Set<string>
 // ============ Server-side conversation memory (per browser session) ============
 type StoredMessage = { role: 'user' | 'assistant'; content: string };
 
-async function loadTranscript(sessionId: string): Promise<StoredMessage[]> {
+async function loadTranscript(sessionId: string): Promise<StoredMessage[] | null> {
   try {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const client = supabaseAdmin as unknown as { from: (t: string) => any };
-    const { data } = await client
+    const { data, error } = await client
       .from('chat_sessions')
       .select('messages')
       .eq('session_id', sessionId)
       .maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
     const msgs = data?.messages as StoredMessage[] | undefined;
     return Array.isArray(msgs)
       ? msgs.filter((m) => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim())
-      : [];
+      : null;
   } catch (e) {
     console.error('[chat] memory load failed', e);
-    return [];
+    return null;
   }
 }
 
@@ -339,27 +341,45 @@ export const Route = createFileRoute('/api/chat')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const key = process.env.LOVABLE_API_KEY;
-        if (!key) return new Response(JSON.stringify({ error: 'AI not configured' }), { status: 500 });
-
-        let body: { sessionId?: string; message?: string; messages?: ChatMessage[] };
+        let body: { action?: string; sessionId?: string; message?: string; messages?: ChatMessage[] };
         try {
           body = await request.json();
         } catch {
           return new Response(JSON.stringify({ error: 'Invalid JSON' }), { status: 400 });
         }
+
+        if (body.action === 'start') {
+          const sessionId = crypto.randomUUID();
+          try {
+            const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+            const client = supabaseAdmin as unknown as { from: (table: string) => any };
+            const { error } = await client.from('chat_sessions').insert({ session_id: sessionId, messages: [] });
+            if (error) throw error;
+            return Response.json({ sessionId });
+          } catch (e) {
+            console.error('[chat] session initialization failed', e);
+            return Response.json({ error: 'Could not start a new chat.' }, { status: 500 });
+          }
+        }
+
+        const key = process.env.LOVABLE_API_KEY;
+        if (!key) return new Response(JSON.stringify({ error: 'AI not configured' }), { status: 500 });
+
         const sessionId = body.sessionId?.trim();
         const clientMessages = Array.isArray(body.messages) ? body.messages : [];
         const userText =
           typeof body.message === 'string' && body.message.trim()
             ? body.message.trim()
             : [...clientMessages].reverse().find((m) => m.role === 'user' && typeof m.content === 'string')?.content;
-        if (!sessionId || !userText) {
+        if (!sessionId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(sessionId) || !userText) {
           return new Response(JSON.stringify({ error: 'Missing sessionId or message' }), { status: 400 });
         }
 
-        // Blaze remembers the conversation on the backend across refreshes.
+        // Only server-created UUID sessions can be used; each fresh page load starts an empty thread.
         const transcript = await loadTranscript(sessionId);
+        if (!transcript) {
+          return new Response(JSON.stringify({ error: 'Chat session expired. Please refresh and try again.' }), { status: 404 });
+        }
         const history: ChatMessage[] = [...transcript, { role: 'user', content: userText }];
 
         const { text: invText, ids: invIds } = await fetchInventorySummary();
@@ -433,7 +453,7 @@ export const Route = createFileRoute('/api/chat')({
 
           // Final assistant reply — persist the exchange to server-side memory
           const reply = msg.content ?? '…';
-          void saveTranscript(
+          await saveTranscript(
             sessionId,
             [
               ...history.filter((m) => m.role === 'user' || m.role === 'assistant'),
