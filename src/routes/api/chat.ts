@@ -162,22 +162,24 @@ async function fetchInventorySummary(): Promise<{ text: string; ids: Set<string>
 // ============ Server-side conversation memory (per browser session) ============
 type StoredMessage = { role: 'user' | 'assistant'; content: string };
 
-async function loadTranscript(sessionId: string): Promise<StoredMessage[]> {
+async function loadTranscript(sessionId: string): Promise<StoredMessage[] | null> {
   try {
     const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     const client = supabaseAdmin as unknown as { from: (t: string) => any };
-    const { data } = await client
+    const { data, error } = await client
       .from('chat_sessions')
       .select('messages')
       .eq('session_id', sessionId)
       .maybeSingle();
+    if (error) throw error;
+    if (!data) return null;
     const msgs = data?.messages as StoredMessage[] | undefined;
     return Array.isArray(msgs)
       ? msgs.filter((m) => (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim())
-      : [];
+      : null;
   } catch (e) {
     console.error('[chat] memory load failed', e);
-    return [];
+    return null;
   }
 }
 
@@ -375,6 +377,9 @@ export const Route = createFileRoute('/api/chat')({
 
         // Only server-created UUID sessions can be used; each fresh page load starts an empty thread.
         const transcript = await loadTranscript(sessionId);
+        if (!transcript) {
+          return new Response(JSON.stringify({ error: 'Chat session expired. Please refresh and try again.' }), { status: 404 });
+        }
         const history: ChatMessage[] = [...transcript, { role: 'user', content: userText }];
 
         const { text: invText, ids: invIds } = await fetchInventorySummary();
