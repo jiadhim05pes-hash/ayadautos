@@ -6,19 +6,30 @@ import { onBlazeOpen } from '@/hooks/use-blaze-chat';
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
-const SESSION_KEY = 'ayad-blaze-session';
-
 const GREETING =
   "Karibu Ayad Automotives! I'm Blaze — ask me about our imports, financing, trade-ins or booking a test drive.";
 
-function getSessionId() {
-  if (typeof window === 'undefined') return '';
-  let id = window.localStorage.getItem(SESSION_KEY);
-  if (!id) {
-    id = crypto.randomUUID();
-    window.localStorage.setItem(SESSION_KEY, id);
+let pendingSessionStart: Promise<string> | null = null;
+
+function startBlazeSession() {
+  if (!pendingSessionStart) {
+    pendingSessionStart = fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'start' }),
+    })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok || typeof data.sessionId !== 'string') {
+          throw new Error(data.error ?? 'Could not start a new chat.');
+        }
+        return data.sessionId as string;
+      })
+      .finally(() => {
+        pendingSessionStart = null;
+      });
   }
-  return id;
+  return pendingSessionStart;
 }
 
 export function AiChatWidget() {
@@ -34,13 +45,18 @@ export function AiChatWidget() {
 
   useEffect(() => {
     setMounted(true);
-    setSessionId(getSessionId());
-    // Blaze keeps memory on the backend (per browser session), but every
-    // refresh starts a visually clean chat — no restored local history.
-    try {
-      window.localStorage.removeItem('ayad-blaze-history');
-    } catch {}
     setMessages([]);
+    let active = true;
+    void startBlazeSession()
+      .then((id) => {
+        if (active) setSessionId(id);
+      })
+      .catch((error) => {
+        console.error('[chat] session start failed', error);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Listen for global "open Blaze" events (from CTAs across the site).
@@ -71,7 +87,7 @@ export function AiChatWidget() {
 
   async function send(override?: string) {
     const text = (override ?? input).trim();
-    if (!text || loading) return;
+    if (!text || loading || !sessionId) return;
     setMessages((m) => [...m, { role: 'user', content: text }]);
     setInput('');
     setLoading(true);
@@ -169,7 +185,7 @@ export function AiChatWidget() {
               />
               <button
                 type="submit"
-                disabled={loading || !input.trim()}
+                disabled={loading || !sessionId || !input.trim()}
                 className="bg-accent text-accent-foreground rounded-lg px-3 py-2 disabled:opacity-40 hover:bg-accent/90"
                 aria-label="Send"
               >
