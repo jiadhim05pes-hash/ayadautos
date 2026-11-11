@@ -219,6 +219,48 @@ export type Database = {
           },
         ]
       }
+      import_requests: {
+        Row: {
+          created_at: string
+          email: string
+          fuel_type: string
+          full_name: string
+          id: string
+          import_type: string
+          phone: string
+          preferred_make_model: string
+          target_budget_kes: number
+          year_from: number
+          year_to: number
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          fuel_type: string
+          full_name: string
+          id?: string
+          import_type: string
+          phone: string
+          preferred_make_model: string
+          target_budget_kes: number
+          year_from: number
+          year_to: number
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          fuel_type?: string
+          full_name?: string
+          id?: string
+          import_type?: string
+          phone?: string
+          preferred_make_model?: string
+          target_budget_kes?: number
+          year_from?: number
+          year_to?: number
+        }
+        Relationships: []
+      }
       page_views: {
         Row: {
           created_at: string
