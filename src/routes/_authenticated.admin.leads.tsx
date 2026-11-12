@@ -12,7 +12,7 @@ export const Route = createFileRoute('/_authenticated/admin/leads')({
 
 const client = supabase as unknown as { from: (t: string) => any };
 
-type TabKey = 'contact' | 'test_drive' | 'finance' | 'trade_in' | 'ai_chat';
+type TabKey = 'contact' | 'test_drive' | 'finance' | 'trade_in' | 'ai_chat' | 'import_request';
 
 const TABLES: Record<TabKey, { table: string; label: string }> = {
   contact: { table: 'contact_messages', label: 'Contact Messages' },
@@ -20,6 +20,7 @@ const TABLES: Record<TabKey, { table: string; label: string }> = {
   finance: { table: 'finance_requests', label: 'Finance' },
   trade_in: { table: 'trade_in_requests', label: 'Trade-In' },
   ai_chat: { table: 'ai_chat_leads', label: 'AI Chat Leads' },
+  import_request: { table: 'import_requests', label: 'Import Requests' },
 };
 
 const STATUSES: LeadStatus[] = ['new', 'in_progress', 'contacted', 'won', 'lost', 'archived'];
@@ -81,7 +82,7 @@ function LeadsInbox() {
                 <div className="flex flex-wrap justify-between gap-3 items-start">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold">{r.name || r.email || 'AI Chat Lead'}</span>
+                      <span className="font-semibold">{r.name || r.full_name || r.email || 'AI Chat Lead'}</span>
                       {r.phone && (
                         <a href={`tel:${r.phone}`} className="text-xs text-accent hover:underline">{r.phone}</a>
                       )}
@@ -94,16 +95,18 @@ function LeadsInbox() {
                     </div>
                     <LeadBody row={r} tab={tab} />
                   </div>
-                  <div className="flex gap-2 items-center">
-                    <select
-                      value={r.status}
-                      onChange={(e) => updateStatus(r.id, e.target.value as LeadStatus)}
-                      className="text-xs bg-input border border-border rounded px-2 py-1"
-                    >
-                      {STATUSES.map((s) => <option key={s}>{s}</option>)}
-                    </select>
-                    <button onClick={() => del(r.id)} className="text-xs text-red-400 hover:underline">Delete</button>
-                  </div>
+                  {tab !== 'import_request' && (
+                    <div className="flex gap-2 items-center">
+                      <select
+                        value={r.status}
+                        onChange={(e) => updateStatus(r.id, e.target.value as LeadStatus)}
+                        className="text-xs bg-input border border-border rounded px-2 py-1"
+                      >
+                        {STATUSES.map((s) => <option key={s}>{s}</option>)}
+                      </select>
+                      <button onClick={() => del(r.id)} className="text-xs text-red-400 hover:underline">Delete</button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -152,6 +155,15 @@ function LeadBody({ row: r, tab }: { row: any; tab: TabKey }) {
           {r.budget_kes != null && <>Budget: {formatKes(Number(r.budget_kes))} · </>}
           {r.language && <>Lang: {r.language} · </>}
           {r.escalated_to_human && <span className="text-accent">Escalated to human</span>}
+        </p>
+      )}
+      {tab === 'import_request' && (
+        <p>
+          <span className="text-foreground">{r.preferred_make_model}</span>
+          {' · '}{r.year_from}–{r.year_to}
+          {' · Budget: '}{formatKes(Number(r.target_budget_kes))}
+          {' · '}{r.fuel_type}
+          {' · '}{r.import_type}
         </p>
       )}
     </div>

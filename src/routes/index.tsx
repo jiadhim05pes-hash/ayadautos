@@ -171,7 +171,7 @@ function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
-                { name: 'James Mwangi', role: 'Business Owner', text: 'Excellent service and quality vehicles. The team handled everything from selection to financing \u2014 I drove off in two weeks.' },
+                { name: 'James Mwangi', role: 'Business Owner', text: 'Excellent service and quality vehicles. The team handled everything from selection to financing.' },
                 { name: 'Sarah Kipchoge', role: 'Executive', text: 'Best dealership experience in Nairobi. Professional, transparent paperwork, and a beautiful Lexus RX delivered as promised.' },
                 { name: 'David Okonkwo', role: 'Entrepreneur', text: 'Great financing options and support throughout the process. They walked me through the SACCO option which saved me thousands.' },
               ].map((t) => (

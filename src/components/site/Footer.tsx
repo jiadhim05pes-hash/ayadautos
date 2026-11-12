@@ -49,6 +49,7 @@ export function Footer() {
             <li><Link to="/about" className="text-muted-foreground hover:text-accent">About Us</Link></li>
             <li><Link to="/services" className="text-muted-foreground hover:text-accent">Services</Link></li>
             <li><Link to="/inventory" className="text-muted-foreground hover:text-accent">Inventory</Link></li>
+            <li><Link to="/import" className="text-muted-foreground hover:text-accent">Import</Link></li>
             <li><Link to="/financing" className="text-muted-foreground hover:text-accent">Financing</Link></li>
             <li><Link to="/testimonials" className="text-muted-foreground hover:text-accent">Testimonials</Link></li>
             <li><Link to="/faqs" className="text-muted-foreground hover:text-accent">FAQs</Link></li>
