@@ -7,6 +7,7 @@ import { useVehicleList } from '@/hooks/use-vehicle-lists';
 const PRIMARY = [
   { to: '/inventory', label: 'Inventory' },
   { to: '/financing', label: 'Financing' },
+  { to: '/import', label: 'Import' },
   { to: '/trade-in', label: 'Trade-In' },
 ] as const;
 
