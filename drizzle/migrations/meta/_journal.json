@@ -15,6 +15,13 @@
       "when": 1794544237382,
       "tag": "0001_allow_super_admin_read_import_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794545880046,
+      "tag": "0002_tighten_selected_public_policies",
+      "breakpoints": true
     }
   ]
 }
