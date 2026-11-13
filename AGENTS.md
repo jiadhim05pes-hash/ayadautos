@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Blaze chat sessions use server-issued UUIDs and an initialized empty database row; chat requests must match an existing row to prevent stale transcript reuse.
+- Public import requests share a Zod schema between browser validation and a server function; privileged inserts use the generated server client and staff-only RLS read access.

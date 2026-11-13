@@ -1,0 +1,1 @@
+CREATE POLICY "Super admins read import requests" ON public.import_requests FOR SELECT TO authenticated USING (public.has_role(auth.uid(), 'super_admin'));
